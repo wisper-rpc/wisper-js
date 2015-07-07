@@ -1,0 +1,17 @@
+{
+  "name": "wisper-js",
+  "version": "0.1.0",
+  "description": "A protocol for remote procedure calls, and object abstractions.",
+
+  "main": "wisper.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+
+  "author": "Widespace AB",
+  "license": "UNLICENSED",
+  "private": true,
+
+  "devDependencies": {},
+  "dependencies": {}
+}
