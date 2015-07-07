@@ -1,7 +1,12 @@
-import sdk, { K, forEach } from './rpc.es6';
+import sdk, { K, forEach, map } from './rpc.es6';
+
+const secretPrefix = '_';
 
 const remoteObjectInstances = {};
 
+
+// The `InterfaceName` decorator registers the RemoteObject
+// under the given `name`.
 export function InterfaceName(name) {
   // TODO: expose event functions
   // sdk.expose(name + ':!', function (id, event, data) {
@@ -12,14 +17,68 @@ export function InterfaceName(name) {
 }
 
 
+// The `Properties` decorator adds properties to the prototype
+// of the decorated class. It automatically dispatches events
+// over RPC whenever these properties are modified.
+export function Properties(properties) {
+  return cls => {
+    // Setup default values for properties on prototype.
+    forEach(properties, (type, key) => {
+      Object.defineProperty(cls.prototype, secretPrefix + key, {
+        enumerable: false,
+        value: type.defaultValue()
+      });
+    });
+
+    // Generate getters/setters for properties.
+    Object.defineProperties(cls.prototype, map(properties, descriptorFromType));
+  }
+}
+
+
+// Creates a property descriptor from a type and key.
+function descriptorFromType(type, key) {
+  const secretKey = secretPrefix + key;
+
+  const descriptor = {
+    enumerable: false,
+    get() {
+      return this[secretKey];
+    }
+  };
+
+  if (type.writable) {
+    descriptor.set = function (value) {
+      if (type.valid(value))
+        this[secretKey] = value;
+    }
+  }
+
+  return descriptor;
+}
+
+
+export function expose(func) {
+  func.exposed = true;
+}
+
 /*
   Base-class for RemoteObjects. Create new RemoteObjects by extending and
   decorating the class with @InterfaceName.
 
   Example:
+    import { InterfaceName, Properties, RemoteObject } from './RemoteObject.es6';
+    import { string } from './type.es6';
 
-    @InterfaceName('wisp.ai.A')
-    class A extends RemoteObject {}
+    @InterfaceName('wisp.ai.Audio')
+    @Properties({
+      src: string
+    })
+    class Audio extends RemoteObject {
+      play() {
+
+      }
+    }
 
   Notes:
     RemoteObject cannot be made Thenable, due to the Promise unwrapping
@@ -39,7 +98,7 @@ export class RemoteObject {
   constructor(args=[]) {
     this.id = sdk.rpc(this.constructor.interfaceName + '~', args).then(result => {
       forEach(result.props, (val, key) => {
-        this['_' + key] = val;
+        this[secretPrefix + key] = val;
       });
       remoteObjectInstances[result.id] = this;
       return this._id = result.id;

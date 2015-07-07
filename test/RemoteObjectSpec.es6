@@ -1,191 +1,58 @@
-import RemoteObject from '../src/RemoteObject.es6';
+import { InterfaceName, Properties, RemoteObject } from '../src/RemoteObject.es6';
+import * as type from '../src/type.es6';
+
 import { Promise } from '../src/rpc.es6';
 import log from '../src/logger.es6';
 
-describe("RemoteObject class", function() {
-    const interfaceName = 'wisp.ai.TestRemoteObject';
+import sdk, { K } from '../src/rpc.es6';
 
-    it("constructor should not return its own instance", function(){
-        var newInstance = new RemoteObject(interfaceName, {});
+describe("RemoteObject", function () {
 
-        expect(newInstance instanceof RemoteObject).toBeFalsy();
-    });
+  // Override `sdk.rpc` before each test, and reset it afterwards.
+  var sdk_rpc = sdk.rpc;
+  var nextId = 0;
 
-    it("constructor should return a promise instead of the own instance", function(){
-        var newInstance = new RemoteObject(interfaceName, {});
+  beforeEach(function () {
+    sdk.rpc = function () {
+      return Promise.resolve({
+        id: String(nextId++)
+      });
+    }
+  });
 
-        expect(newInstance instanceof Promise).toBeTruthy();
-    });
+  afterEach(function () {
+    sdk.rpc = sdk_rpc;
+  });
 
-    it("constructor will send the instance through promise after resolving it", function(done){
+  // Test class for tests.
+  @InterfaceName("wisp.test.EmptyObject")
+  @Properties({
+    name: type.string
+  })
+  class TestRemoteObject extends RemoteObject {
+    constructor() {
+      super();
+    }
+  }
 
-        spyOn(RemoteObject.prototype, "constructNativeObject").and.callFake(function() {
-            return new Promise(function (resolve, reject) {
-                resolve(Math.random());
-            });
-        });
+  it("constructor should return its own instance", function () {
+    expect(new TestRemoteObject() instanceof RemoteObject).toBeTruthy();
+  });
 
-        var remoteObjectPromise = new RemoteObject(interfaceName, {});
+  it('should create properties from annotations', function () {
+    const instance = new TestRemoteObject();
 
-        remoteObjectPromise.then(function(remoteObjectInstance){
-            expect(remoteObjectInstance instanceof RemoteObject).toBeTruthy();
+    expect(typeof instance.name).toEqual('string');
+    expect(instance.name).toEqual('');
+  });
 
-            done();
-        });
-    });
+  it("`ready` property is a Promise for the resolved instance", function (done) {
+    var newInstance = new TestRemoteObject();
 
-    it("constructor will throw error for invalid remoteName", function(){
-        expect(function(){ new RemoteObject('', {}); }).toThrowError(ReferenceError);
-        expect(function(){ new RemoteObject(null, {}); }).toThrowError(ReferenceError);
-        expect(function(){ new RemoteObject(undefined, {}); }).toThrowError(ReferenceError);
-    });
+    expect(newInstance.ready instanceof Promise.constructor).toBeTruthy();
 
-    it("constructor will throw error for invalid childObjectInstance", function(){
-        expect(function(){ new RemoteObject(interfaceName, ''); }).toThrowError(ReferenceError);
-        expect(function(){ new RemoteObject(interfaceName, 'sample_text'); }).toThrowError(ReferenceError);
-        expect(function(){ new RemoteObject(interfaceName, null); }).toThrowError(ReferenceError);
-        expect(function(){ new RemoteObject(interfaceName, undefined); }).toThrowError(ReferenceError);
-        expect(function(){ new RemoteObject(interfaceName, 123); }).toThrowError(ReferenceError);
-    });
-
-    it("constructor stores the instance id of remote object after creating object successfully", function(done){
-        var remoteObjectInstanceId;
-        spyOn(RemoteObject.prototype, "constructNativeObject").and.callFake(function() {
-            return new Promise(function (resolve, reject) {
-                remoteObjectInstanceId = Math.random();
-                resolve(remoteObjectInstanceId);
-            });
-        });
-
-        var remoteObjectPromise = new RemoteObject(interfaceName, {});
-
-        remoteObjectPromise.then(function(remoteObjectInstance){
-            expect(remoteObjectInstance.id).toBe(remoteObjectInstanceId);
-
-            done();
-        });
-    });
-
-    it("constructor stores the child instance after creating object successfully", function(done){
-        var remoteObjectInstanceId;
-        spyOn(RemoteObject.prototype, "constructNativeObject").and.callFake(function() {
-            return new Promise(function (resolve, reject) {
-                remoteObjectInstanceId = Math.random();
-                resolve(remoteObjectInstanceId);
-            });
-        });
-
-        var sampleChildClass = function(){}
-        var sampleChildClassInstance = new sampleChildClass();
-
-        var remoteObjectPromise = new RemoteObject(interfaceName, sampleChildClassInstance);
-
-        remoteObjectPromise.then(function(remoteObjectInstance){
-            expect(RemoteObject.getInstance(remoteObjectInstance.id)).toBe(sampleChildClassInstance);
-
-            done();
-        });
-    });
-
-    it("isInstanceExists method returns false for invalid instance id", function(){
-        var result = RemoteObject.isInstanceExists("invalid id");
-        expect(result).toBe(false);
-    });
-
-    it("isInstanceExists method returns true for valid instance id", function(done){
-        var remoteObjectInstanceId;
-        spyOn(RemoteObject.prototype, "constructNativeObject").and.callFake(function() {
-            return new Promise(function (resolve, reject) {
-                remoteObjectInstanceId = Math.random();
-                resolve(remoteObjectInstanceId);
-            });
-        });
-
-        var remoteObjectPromise = new RemoteObject(interfaceName, {});
-
-        remoteObjectPromise.then(function(remoteObjectInstance){
-            expect(RemoteObject.isInstanceExists(remoteObjectInstance.id)).toBeTruthy();
-
-            done();
-        });
-    });
-
-    it("getInstance method returns the object instance for specific instance id", function(done){
-        var remoteObjectInstanceId;
-        spyOn(RemoteObject.prototype, "constructNativeObject").and.callFake(function() {
-            return new Promise(function (resolve, reject) {
-                remoteObjectInstanceId = Math.random();
-                resolve(remoteObjectInstanceId);
-            });
-        });
-
-        var sampleChildClass = function(){}
-        var sampleChildClassInstance = new sampleChildClass();
-
-        var remoteObjectPromise = new RemoteObject(interfaceName, sampleChildClassInstance);
-
-        remoteObjectPromise.then(function(remoteObjectInstance){
-            expect(RemoteObject.getInstance(remoteObjectInstance.id)).toBe(sampleChildClassInstance);
-
-            done();
-        });
-    });
-
-    it("getInstance method returns null if no instance available for specific instance id", function(done){
-        var remoteObjectInstanceId;
-        spyOn(RemoteObject.prototype, "constructNativeObject").and.callFake(function() {
-            return new Promise(function (resolve, reject) {
-                remoteObjectInstanceId = Math.random();
-                resolve(remoteObjectInstanceId);
-            });
-        });
-
-        var remoteObjectPromise = new RemoteObject(interfaceName, {});
-
-        remoteObjectPromise.then(function(remoteObjectInstance){
-            expect(RemoteObject.getInstance('different_id')).toBeNull();
-
-            done();
-        });
-    });
-
-    it("remoteName setter method should not allow to set undefined, null or empty value", function(done){
-        spyOn(RemoteObject.prototype, "constructNativeObject").and.callFake(function() {
-            return new Promise(function (resolve, reject) {
-                resolve(Math.random());
-            });
-        });
-
-        var remoteObjectPromise = new RemoteObject(interfaceName, {});
-
-        remoteObjectPromise.then(function(remoteObjectInstance){
-            remoteObjectInstance.remoteName = '';
-            expect(remoteObjectInstance.remoteName).not.toBe('');
-
-            remoteObjectInstance.remoteName = null;
-            expect(remoteObjectInstance.remoteName).not.toBeNull();
-
-            remoteObjectInstance.remoteName = undefined;
-            expect(remoteObjectInstance.remoteName).toBeDefined();
-
-            done();
-        });
-    });
-
-    it("destroy method should remove the self instance from collection", function(done){
-        spyOn(RemoteObject.prototype, "constructNativeObject").and.callFake(function() {
-            return new Promise(function (resolve, reject) {
-                resolve(Math.random());
-            });
-        });
-
-        var remoteObjectPromise = new RemoteObject(interfaceName, {});
-
-        remoteObjectPromise.then(function(remoteObjectInstance){
-            remoteObjectInstance.destroy();
-            expect(RemoteObject.getInstance(remoteObjectInstance.id)).toBeNull();
-
-            done();
-        });
-    });
+    newInstance.ready.then(instance => {
+      expect(instance instanceof RemoteObject).toBeTruthy();
+    }).then(done, done);
+  });
 });
