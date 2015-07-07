@@ -9,19 +9,25 @@ import sdk, { K } from '../src/rpc.es6';
 describe("RemoteObject", function () {
 
   // Override `sdk.rpc` before each test, and reset it afterwards.
-  var sdk_rpc = sdk.rpc;
+  const sdk_rpc = sdk.rpc,
+    sdk_notify = sdk.notify;
+
   var nextId = 0;
+  var lastMessage;
 
   beforeEach(function () {
-    sdk.rpc = function () {
+    sdk.notify = sdk.rpc = function (method, params) {
+      lastMessage = { method, params };
+
       return Promise.resolve({
         id: String(nextId++)
       });
-    }
+    };
   });
 
   afterEach(function () {
     sdk.rpc = sdk_rpc;
+    sdk.notify = sdk_notify;
   });
 
   // Test class for tests.
@@ -39,11 +45,21 @@ describe("RemoteObject", function () {
     expect(new TestRemoteObject() instanceof RemoteObject).toBeTruthy();
   });
 
-  it('should create properties from annotations', function () {
+  it('should create properties from annotations', function (done) {
     const instance = new TestRemoteObject();
 
     expect(typeof instance.name).toEqual('string');
     expect(instance.name).toEqual('');
+
+    instance.name = "Charlie";
+
+    setTimeout(() => {
+      expect(lastMessage).toEqual({
+        method: 'wisp.test.EmptyObject:!',
+        params: [ '1', 'name', 'Charlie' ]
+      });
+      done();
+    }, 20);
   });
 
   it("`ready` property is a Promise for the resolved instance", function (done) {
@@ -53,6 +69,8 @@ describe("RemoteObject", function () {
 
     newInstance.ready.then(instance => {
       expect(instance instanceof RemoteObject).toBeTruthy();
+
+      expect(lastMessage.method).toEqual('wisp.test.EmptyObject~');
     }).then(done, done);
   });
 });

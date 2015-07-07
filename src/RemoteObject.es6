@@ -25,23 +25,21 @@ export function Properties(properties) {
     // Setup default values for properties on prototype.
     forEach(properties, (type, key) => {
       Object.defineProperty(cls.prototype, secretPrefix + key, {
-        enumerable: false,
+        writable: true,
         value: type.defaultValue()
       });
-    });
 
-    // Generate getters/setters for properties.
-    Object.defineProperties(cls.prototype, map(properties, descriptorFromType));
+      Object.defineProperty(cls.prototype, key, descriptor(cls, key, type));
+    });
   }
 }
 
 
 // Creates a property descriptor from a type and key.
-function descriptorFromType(type, key) {
+function descriptor(cls, key, type) {
   const secretKey = secretPrefix + key;
 
   const descriptor = {
-    enumerable: false,
     get() {
       return this[secretKey];
     }
@@ -49,9 +47,11 @@ function descriptorFromType(type, key) {
 
   if (type.writable) {
     descriptor.set = function (value) {
-      if (type.valid(value))
+      if (type.valid(value)) {
         this[secretKey] = value;
-    }
+        this.id.then(id => sdk.notify(cls.interfaceName + ':!', [id, key, value]));
+      }
+    };
   }
 
   return descriptor;
