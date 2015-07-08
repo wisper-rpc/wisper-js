@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "description": "A protocol for remote procedure calls, and object abstractions.",
 
-  "main": "wisper.js",
+  "main": "wisper.es6",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "browserify": {
+    "transform": [ "babelify" ]
   },
 
   "author": "Widespace AB",
@@ -13,5 +16,7 @@
   "private": true,
 
   "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "lodash": "^3.10.0"
+  }
 }
