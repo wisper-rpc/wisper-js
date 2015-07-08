@@ -20,6 +20,7 @@ import { K } from './rpc.es6';
 // ```
 
 
+// The `TypeError` to throw when a default value is not a valid type.
 const invalidDefault = new TypeError("Invalid default value for type.");
 
 
@@ -70,5 +71,19 @@ export function array(baseType) {
     return Array.isArray(type) && type.every(baseType.valid);
   };
   type.defaultValue = () => [];
+  return type;
+}
+
+
+export function object(properties) {
+  const type = Object.create(any);
+  // TODO
+  return type;
+}
+
+
+export function nullable(baseType) {
+  const type = Object.create(baseType);
+  // TODO
   return type;
 }

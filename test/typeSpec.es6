@@ -1,4 +1,4 @@
-import { string, number, boolean, readonly, array } from '../src/type.es6';
+import { string, number, boolean, readonly, array, object, nullable } from '../src/type.es6';
 
 describe('type', function () {
   function all(arr) {
@@ -47,12 +47,46 @@ describe('type', function () {
   });
 
 
-  it('can compose types to create more complex ones', function () {
-    expect(all([
-      array(string).valid([]),
-      array(string).valid(['megaman']),
-      array(number).valid([13, 37])
-    ])).toBeTruthy();
-  });
+  describe('can create composite types:', function () {
 
+    const person = object({
+      name: string,
+      age: number
+    });
+
+
+    it('object', function () {
+      let default1 = person.defaultValue(),
+        default2 = person.defaultValue();
+
+      // The properties assume their respective defaults.
+      expect(default1).toEqual({ name: '', age: 0 });
+
+      // The instances returned by `defaultValue` are not the same.
+      expect(default1 === default2).toBeFalsy();
+
+      // Needs all properties to be valid.
+      expect(person.valid({ name: 'yo' })).toBeFalsy();
+
+      // Properties must have correct type.
+      expect(person.valid({ name: 'yo', age: '15' })).toBeFalsy();
+    });
+
+
+    it('nullable', function () {
+      const nullablePerson = nullable(person);
+
+      expect(nullablePerson.defaultValue()).toEqual(null);
+    });
+
+
+    it('array', function () {
+      expect(all([
+        array(string).valid([]),
+        array(string).valid(['megaman']),
+        array(number).valid([13, 37]),
+        array(person).valid([{ name: 'Dr. Light', age: 74 }])
+      ])).toBeTruthy();
+    });
+  });
 });
