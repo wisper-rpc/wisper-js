@@ -70,6 +70,8 @@ describe('type', function () {
 
       // Properties must have correct type.
       expect(person.valid({ name: 'yo', age: '15' })).toBeFalsy();
+
+      expect(person.valid("123")).toBeFalsy();
     });
 
 

@@ -1,4 +1,4 @@
-import { K } from './rpc.es6';
+import { K, forEach } from './rpc.es6';
 
 // A `type` has the following properties:
 //   writable     : boolean
@@ -77,13 +77,44 @@ export function array(baseType) {
 
 export function object(properties) {
   const type = Object.create(any);
-  // TODO
+
+  type.valid = type => {
+      var isAllPropertiesValid = () => {
+          var BreakException= {};
+
+          try {
+            forEach(properties, (baseType, key) => {
+              if (!baseType.valid(type[key])) {
+                throw BreakException;
+              }
+            });
+          }
+          catch(e) {
+            return false;
+          }
+
+          return true;
+      };
+
+      return typeof type === 'object' && isAllPropertiesValid();
+  };
+
+  type.defaultValue = () => {
+      let obj = {};
+      forEach(properties, (baseType, key) => {
+        obj[key] = baseType.defaultValue();
+      });
+
+      return obj;
+  };
+
   return type;
 }
 
 
 export function nullable(baseType) {
   const type = Object.create(baseType);
-  // TODO
+
+  type.defaultValue = () => null;
   return type;
 }
