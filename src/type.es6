@@ -41,7 +41,7 @@ const any = {
 
 
 // Creates a new type from a default value and a checker function.
-function type(defaultValue, checker) {
+function newtype(defaultValue, checker) {
   const type = Object.create(any);
   type.defaultValue = K(defaultValue);
   type.valid = checker;
@@ -49,10 +49,10 @@ function type(defaultValue, checker) {
 }
 
 
-// Default types
-export const string  = type('',    val => typeof val === 'string');
-export const number  = type(0,     val => typeof val === 'number');
-export const boolean = type(false, val => typeof val === 'boolean');
+// Primitive types
+export const string  = newtype('',    val => typeof val === 'string');
+export const number  = newtype(0,     val => typeof val === 'number');
+export const boolean = newtype(false, val => typeof val === 'boolean');
 
 
 // Modifies the given `baseType` to be read-only.
