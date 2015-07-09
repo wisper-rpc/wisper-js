@@ -51,16 +51,16 @@ describe('type', function () {
 
     const person = object({
       name: string,
-      age: number
+      age: number,
+      fullname: object({first: string, last: string})
     });
-
 
     it('object', function () {
       let default1 = person.defaultValue(),
         default2 = person.defaultValue();
 
       // The properties assume their respective defaults.
-      expect(default1).toEqual({ name: '', age: 0 });
+      expect(default1).toEqual({ name: '', age: 0, fullname: {first: '', last: ''} });
 
       // The instances returned by `defaultValue` are not the same.
       expect(default1 === default2).toBeFalsy();
@@ -71,14 +71,27 @@ describe('type', function () {
       // Properties must have correct type.
       expect(person.valid({ name: 'yo', age: '15' })).toBeFalsy();
 
+      // Anything else should fail.
       expect(person.valid("123")).toBeFalsy();
+      expect(person.valid(123)).toBeFalsy();
+      expect(person.valid(true)).toBeFalsy();
     });
-
 
     it('nullable', function () {
       const nullablePerson = nullable(person);
 
       expect(nullablePerson.defaultValue()).toEqual(null);
+
+      // The `baseType` is valid.
+      expect(nullablePerson.valid({ name: 'Dr. Wiley', age: 66, fullname: {first: '', last: ''} })).toBeTruthy();
+
+      // `null` should be valid.
+      expect(nullablePerson.valid(null)).toBeTruthy();
+
+      // Anything else should fail.
+      expect(nullablePerson.valid(1)).toBeFalsy();
+      expect(nullablePerson.valid("string")).toBeFalsy();
+      expect(nullablePerson.valid(undefined)).toBeFalsy();
     });
 
 
@@ -87,7 +100,7 @@ describe('type', function () {
         array(string).valid([]),
         array(string).valid(['megaman']),
         array(number).valid([13, 37]),
-        array(person).valid([{ name: 'Dr. Light', age: 74 }])
+        array(person).valid([{ name: 'Dr. Light', age: 74, fullname: {first: '', last: ''} }])
       ])).toBeTruthy();
     });
   });

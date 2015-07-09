@@ -1,4 +1,4 @@
-import { K, forEach } from './rpc.es6';
+import { K, map, every } from './rpc.es6';
 
 // A `type` has the following properties:
 //   writable     : boolean
@@ -22,7 +22,6 @@ import { K, forEach } from './rpc.es6';
 
 // The `TypeError` to throw when a default value is not a valid type.
 const invalidDefault = new TypeError("Invalid default value for type.");
-
 
 // The `any` type is at the top of the hierarchy.
 // All values are valid, but it has no default.
@@ -74,47 +73,18 @@ export function array(baseType) {
   return type;
 }
 
-
+// Creates a new composite type of the given object structure.
 export function object(properties) {
   const type = Object.create(any);
-
-  type.valid = type => {
-      var isAllPropertiesValid = () => {
-          var BreakException= {};
-
-          try {
-            forEach(properties, (baseType, key) => {
-              if (!baseType.valid(type[key])) {
-                throw BreakException;
-              }
-            });
-          }
-          catch(e) {
-            return false;
-          }
-
-          return true;
-      };
-
-      return typeof type === 'object' && isAllPropertiesValid();
-  };
-
-  type.defaultValue = () => {
-      let obj = {};
-      forEach(properties, (baseType, key) => {
-        obj[key] = baseType.defaultValue();
-      });
-
-      return obj;
-  };
-
+  type.valid = val => typeof val === 'object' && every(properties, (baseType, key) => baseType.valid(val[key]));
+  type.defaultValue = () => map(properties, baseType => baseType.defaultValue());
   return type;
 }
 
-
+// Creates a type that is nullable of the given `baseType`.
 export function nullable(baseType) {
   const type = Object.create(baseType);
-
+  type.valid = val => val === null ||  baseType.valid(val);
   type.defaultValue = () => null;
   return type;
 }
