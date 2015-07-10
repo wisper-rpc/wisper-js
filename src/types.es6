@@ -127,3 +127,12 @@ export function nullable(baseType) {
   type.defaultValue = () => null;
   return type;
 }
+
+
+// Creates a type that is satisfied by instances of `cls`.
+export function instance(cls) {
+  const type = Object.create(any);
+  type.valid = val => val === null || val instanceof cls;
+  type.defaultValue = () => null;
+  return type;
+}
