@@ -24,10 +24,6 @@ export class BaseBridge {
     this.sendJSON(JSON.stringify(msg));
   }
 
-  sendError(id, error) {
-    this.send({ id, error });
-  }
-
   invoke(method, params=[]) {
     const id = this.nextId();
 
@@ -52,7 +48,7 @@ export class BaseBridge {
 
   receiveJSON(json) {
     try {
-      this.receive(JSON.parse());
+      this.receive(JSON.parse(json));
     } catch (e) {
       this.send(WisperError.cast(e))
     }
@@ -72,17 +68,17 @@ export class BaseBridge {
       console.error(msg.error.name, msg.error.message);
     } else {
       // TODO: Send responses if a Promise is returned.
-      this.router.route(msg.method, msg);
+      this.sendReponse(msg.id, this.router.route(msg.method, msg));
     }
   }
 
-  sendReponse(id, eventual) {
-    eventual && eventual.then(result => {
-      // TODO: ...
-    }, error => {
-      // TODO: ...
-    });
+
+  sendReponse(id, promise) {
+    promise && promise.catch(WisperError.cast).then(
+      result => id && this.send({ id, result }),
+      error => this.send({ id, error }));
   }
+
 
   handleResponse(msg) {
     const waiting = this.waiting[msg.id];
@@ -99,7 +95,10 @@ export class BaseBridge {
 
   exposeClass(cls) {
     Object.defineProperty(cls.prototype, 'bridge', { value: this });
-    return this.router.expose(cls.interfaceName, new Class(cls));
+
+    if (!this.router.expose(cls.prototype.interfaceName, new Class(cls))) {
+        console.error(`Route '${cls.prototype.interfaceName}' already exposed.`);
+    }
   }
 
 
