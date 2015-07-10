@@ -2,18 +2,14 @@ import forOwn from 'lodash/object/forOwn';
 
 const secretPrefix = '_';
 
-const remoteObjectInstances = {};
 
-
-// The `InterfaceName` decorator registers the RemoteObject
+// The `InterfaceName` decorator registers the Remote
 // under the given `name`.
 export function InterfaceName(name) {
-  // TODO: expose event functions
-  // this.bridge.expose(name + ':!', function (id, event, data) {
-  //
-  // });
-
-  return cls => { cls.prototype.interfaceName = name; }
+  return cls => {
+    Object.defineProperty(cls, 'instances', { value: Object.create(null) });
+    cls.prototype.interfaceName = name;
+  };
 }
 
 
@@ -49,7 +45,7 @@ function descriptor(cls, key, type) {
     descriptor.set = function (value) {
       if (type.valid(value)) {
         this[secretKey] = value;
-        this.id.then(id => this.bridge.notify(this.interfaceName + ':!', [id, key, value]));
+        this.bridge.notifyAsync(this.interfaceName + ':!', [this.id, key, value]);
       }
     };
   }
@@ -58,49 +54,55 @@ function descriptor(cls, key, type) {
 }
 
 
-export function expose(func) {
-  func.exposed = true;
-}
-
-/*
-  Base-class for RemoteObjects. Create new RemoteObjects by extending and
-  decorating the class with @InterfaceName.
-
-  Example:
-    import { InterfaceName, Properties, RemoteObject } from './RemoteObject.es6';
-    import { string } from './type.es6';
-
-    @InterfaceName('wisp.ai.Audio')
-    @Properties({
-      src: string
-    })
-    class Audio extends RemoteObject {
-      play() {
-
-      }
-    }
-
-  Notes:
-    RemoteObject cannot be made Thenable, due to the Promise unwrapping
-    rules. The following method, results in an infinite chain of Promises.
-    Instead, use the `ready` property.
-
-    then(resolve, reject) {
-      return this.id.then(() => this).then(resolve, reject);
-    }
-*/
-export class RemoteObject {
+/**
+ * Base-class for Remotes. Create new Remotes by extending and
+ * decorating the class with `@InterfaceName` and `@<wisper.Bridge>.exposeClass`.
+ * Remotes have the following key properties, which shouldn't be overriden:
+ *
+ * On each instance:
+ *   id:            Promise<string>
+ *   ready:         Promise<this>
+ *
+ * On the prototype:
+ *   bridge:        wisper.Bridge
+ *   interfaceName: string
+ *
+ * On the class:
+ *   instances:     Object<string, instance>
+ *
+ * Example:
+ *   import { InterfaceName, Properties, Remote, types } from 'wisper-js';
+ *   const { string } = types;
+ *
+ *   import bridge from './some-bridge.es6';
+ *
+ *   @sdk.exposeClass
+ *   @InterfaceName('wisp.ai.Audio')
+ *   @Properties({
+ *     src: string
+ *   })
+ *   class Audio extends Remote {
+ *     constructor(src) {
+ *       super([src]);
+ *     }
+ *
+ *     play() {
+ *       this.bridge.notifyAsync(this.interfaceName + ':play', [this.id]);
+ *     }
+ *   }
+ */
+export class Remote {
 
   /**
    * @constructor
    * @param {Array<?>} args
    */
   constructor(args=[]) {
-    this.id = this.bridge.rpc(this.interfaceName + '~', args).then(result => {
+    this.id = this.bridge.invoke(this.interfaceName + '~', args).then(result => {
       forOwn(result.props, (val, key) => {
         this[secretPrefix + key] = val;
       });
-      remoteObjectInstances[result.id] = this;
+      this.constructor.instances[result.id] = this;
       return this._id = result.id;
     });
 
@@ -113,8 +115,12 @@ export class RemoteObject {
    */
   destroy() {
     this.id.then(id => {
-      this.bridge.notify(this.interfaceName + ':~');
-      remoteObjectInstances[id] = null;
+      // Ensure `destroy` is only called once.
+      if (this._id !== id) return;
+      this._id = null;
+
+      this.bridge.notify(this.interfaceName + ':~', [id]);
+      delete this.constructor.instances[id];
     });
   }
 }

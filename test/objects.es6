@@ -1,4 +1,4 @@
-import { InterfaceName, Properties, RemoteObject } from '../src/objects.es6';
+import { InterfaceName, Properties, Remote } from '../src/objects.es6';
 import * as type from '../src/types.es6';
 
 import { BaseBridge } from '../src/bridges.es6';
@@ -15,12 +15,16 @@ describe("RemoteObject", function () {
   var lastMessage;
 
   beforeEach(function () {
-    sdk.notify = sdk.rpc = function (method, params) {
+    sdk.notify = sdk.invoke = function (method, params) {
       lastMessage = { method, params };
 
       return Promise.resolve({
         id: String(nextId++)
       });
+    };
+
+    sdk.notifyAsync = sdk.invokeAsync = function (method, params) {
+      return Promise.all(params).then(this.invoke.bind(this, method));
     };
   });
 
@@ -35,14 +39,14 @@ describe("RemoteObject", function () {
   @Properties({
     name: type.string
   })
-  class TestRemoteObject extends RemoteObject {
+  class TestRemoteObject extends Remote {
     constructor() {
       super();
     }
   }
 
   it("constructor should return its own instance", function () {
-    expect(new TestRemoteObject() instanceof RemoteObject).toBeTruthy();
+    expect(new TestRemoteObject() instanceof Remote).toBeTruthy();
   });
 
   it('should create properties from annotations', function (done) {
@@ -68,7 +72,7 @@ describe("RemoteObject", function () {
     expect(newInstance.ready instanceof Promise).toBeTruthy();
 
     newInstance.ready.then(instance => {
-      expect(instance instanceof RemoteObject).toBeTruthy();
+      expect(instance instanceof Remote).toBeTruthy();
 
       expect(lastMessage.method).toEqual('wisp.test.EmptyObject~');
     }).then(done, done);
