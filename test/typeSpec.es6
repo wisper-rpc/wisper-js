@@ -55,6 +55,17 @@ describe('type', function () {
       fullname: object({first: string, last: string})
     });
 
+    function isFunctionThrowException(func, type){
+      try {
+        func(type);
+      } catch(e) {
+        return e instanceof TypeError &&
+            (e.message == "Invalid base type." ||
+             e.message == "Invalid object structure for properties argument.")
+      }
+      return false;
+    }
+
     it('object', function () {
       let default1 = person.defaultValue(),
         default2 = person.defaultValue();
@@ -75,6 +86,38 @@ describe('type', function () {
       expect(person.valid("123")).toBeFalsy();
       expect(person.valid(123)).toBeFalsy();
       expect(person.valid(true)).toBeFalsy();
+    });
+
+    it('"nullable" function should throw TypeError for invalid base type as parameter', function () {
+      expect([
+        null,
+        undefined,
+        function(){},
+        {}].every(x => isFunctionThrowException(nullable, x))).toBeTruthy();
+    });
+
+    it('"readonly" function should throw TypeError for invalid base type as parameter', function () {
+      expect([
+        null,
+        undefined,
+        function(){},
+        {}].every(x => isFunctionThrowException(readonly, x))).toBeTruthy();
+    });
+
+    it('"array" function should throw TypeError for invalid base type as parameter', function () {
+      expect([
+        null,
+        undefined,
+        function(){},
+        {}].every(x => isFunctionThrowException(array, x))).toBeTruthy();
+    });
+
+    it('"object" function should throw TypeError for invalid property structure as parameter', function () {
+      expect([
+          null, undefined, function(){},
+          string, number, boolean, array(string), nullable(number), readonly(boolean)
+          ,{name: string, age: boolean, fullname: object({first: string, last: string}), do_something: function(){}}
+      ].every(x => isFunctionThrowException(object, x))).toBeTruthy();
     });
 
     it('nullable', function () {
