@@ -2,7 +2,7 @@ import set from 'lodash/object/set';
 import noop from 'lodash/utility/noop';
 
 import { isResponse, isMessage, isPlainError } from './protocol.es6';
-import { Namespace } from './routing.es6';
+import { Class, Namespace } from './routing.es6';
 import { WisperError, domain, code } from './errors.es6';
 
 
@@ -95,6 +95,13 @@ export class BaseBridge {
         `Got unexpected response for id: '${msg.id}', but no request was made.`));
     }
   }
+
+
+  exposeClass(cls) {
+    Object.defineProperty(cls.prototype, 'bridge', { value: this });
+    return this.router.expose(cls.interfaceName, new Class(cls));
+  }
+
 
   expose(path, handler) {
     return this.router.expose(path, handler);
