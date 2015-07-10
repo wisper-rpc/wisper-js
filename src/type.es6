@@ -1,4 +1,4 @@
-import { K, map, every } from './rpc.es6';
+import { K, map, every, typeOf } from './rpc.es6';
 
 // A `type` has the following properties:
 //   writable     : boolean
@@ -22,8 +22,8 @@ import { K, map, every } from './rpc.es6';
 
 // The `TypeError` to throw when a default value is not a valid type.
 const invalidDefault = new TypeError("Invalid default value for type.");
-const invalidProperties = TypeError("Invalid object structure for properties argument.");
-const invalidBaseType = TypeError("Invalid base type.");
+const invalidProperties = new TypeError("Invalid object structure for properties argument.");
+const invalidBaseType = new TypeError("Invalid base type.");
 
 // The `any` type is at the top of the hierarchy.
 // All values are valid, but it has no default.
@@ -70,7 +70,7 @@ export const boolean = newtype(false, val => typeof val === 'boolean');
 
 // Modifies the given `baseType` to be read-only.
 export function readonly(baseType) {
-  if(!isType(baseType)){
+  if (!isType(baseType)) {
     throw invalidBaseType;
   }
 
@@ -82,39 +82,58 @@ export function readonly(baseType) {
 
 // Creates a type that is the array of the given `baseType`.
 export function array(baseType) {
-  if(!isType(baseType)){
+  if (!isType(baseType)) {
     throw invalidBaseType;
   }
 
   const type = Object.create(baseType);
-  type.valid = type => {
-    return Array.isArray(type) && type.every(baseType.valid);
-  };
+  type.valid = type => Array.isArray(type) && type.every(baseType.valid);
   type.defaultValue = () => [];
   return type;
 }
 
 // Creates a new composite type of the given object structure.
-// The given value must be an object with only properties
+// The given value must be an object with only properties.
+//
+// When creating object-types with default values, do:
+//
+// let point = object({
+//   x: number.default(5),
+//   y: number.default(2)
+// });
+//
+// Don't:
+//
+// let point = object({
+//   x: number,
+//   y: number
+// }).default({ x: 5, y: 2 });
+//
+// This would result in the same default object being reused
+// across different objects.
 export function object(properties) {
-  if(!properties || typeof properties !== 'object' || !every(properties, (baseType) => isType(baseType))) {
+  if (typeOf(properties) !== 'object' || !every(properties, isType)) {
     throw invalidProperties;
   }
 
   const type = Object.create(any);
-  type.valid = val => typeof val === 'object' && every(properties, (baseType, key) => baseType.valid(val[key]));
+
+  type.valid = val =>
+    typeOf(val) === 'object' &&
+    every(properties, (baseType, key) => baseType.valid(val[key]));
+
   type.defaultValue = () => map(properties, baseType => baseType.defaultValue());
   return type;
 }
 
 // Creates a type that is nullable of the given `baseType`.
 export function nullable(baseType) {
-  if(!isType(baseType)){
+  if (!isType(baseType)) {
     throw invalidBaseType;
   }
 
   const type = Object.create(baseType);
-  type.valid = val => val === null ||  baseType.valid(val);
+  type.valid = val => val === null || baseType.valid(val);
   type.defaultValue = () => null;
   return type;
 }
