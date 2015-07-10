@@ -2,20 +2,29 @@
   "name": "wisper-js",
   "version": "0.1.0",
   "description": "A protocol for remote procedure calls, and object abstractions.",
-
   "main": "wisper.es6",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "karma start karma.conf.js"
   },
   "browserify": {
-    "transform": [ "babelify" ]
+    "transform": [
+      "babelify"
+    ]
   },
-
   "author": "Widespace AB",
   "license": "UNLICENSED",
   "private": true,
-
-  "devDependencies": {},
+  "devDependencies": {
+    "babelify": "^6.1.2",
+    "browserify-istanbul": "^0.2.1",
+    "jasmine-core": "^2.3.4",
+    "karma": "^0.12.37",
+    "karma-babel-preprocessor": "^5.2.1",
+    "karma-browserify": "^4.2.1",
+    "karma-chrome-launcher": "^0.2.0",
+    "karma-coverage": "^0.4.2",
+    "karma-jasmine": "^0.3.6"
+  },
   "dependencies": {
     "lodash": "^3.10.0"
   }
