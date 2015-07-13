@@ -10,7 +10,8 @@ export default function signature(parameterTypes, returnType) {
     throw invalidSignature;
   }
 
-  return (func) => {
+  return (target, key, descriptor) => {
+    const func = descriptor.value;
     func.parameterTypes = parameterTypes;
     func.returnType = returnType;
   }
