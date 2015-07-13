@@ -1,4 +1,4 @@
-import sdk, { K, forEach, map } from './rpc.es6';
+import forOwn from 'lodash/object/forOwn';
 
 const secretPrefix = '_';
 
@@ -9,11 +9,11 @@ const remoteObjectInstances = {};
 // under the given `name`.
 export function InterfaceName(name) {
   // TODO: expose event functions
-  // sdk.expose(name + ':!', function (id, event, data) {
+  // this.bridge.expose(name + ':!', function (id, event, data) {
   //
   // });
 
-  return cls => { cls.interfaceName = name; }
+  return cls => { cls.prototype.interfaceName = name; }
 }
 
 
@@ -23,7 +23,7 @@ export function InterfaceName(name) {
 export function Properties(properties) {
   return cls => {
     // Setup default values for properties on prototype.
-    forEach(properties, (type, key) => {
+    forOwn(properties, (type, key) => {
       Object.defineProperty(cls.prototype, secretPrefix + key, {
         writable: true,
         value: type.defaultValue()
@@ -49,7 +49,7 @@ function descriptor(cls, key, type) {
     descriptor.set = function (value) {
       if (type.valid(value)) {
         this[secretKey] = value;
-        this.id.then(id => sdk.notify(cls.interfaceName + ':!', [id, key, value]));
+        this.id.then(id => this.bridge.notify(this.interfaceName + ':!', [id, key, value]));
       }
     };
   }
@@ -96,15 +96,15 @@ export class RemoteObject {
    * @param {Array<?>} args
    */
   constructor(args=[]) {
-    this.id = sdk.rpc(this.constructor.interfaceName + '~', args).then(result => {
-      forEach(result.props, (val, key) => {
+    this.id = this.bridge.rpc(this.interfaceName + '~', args).then(result => {
+      forOwn(result.props, (val, key) => {
         this[secretPrefix + key] = val;
       });
       remoteObjectInstances[result.id] = this;
       return this._id = result.id;
     });
 
-    this.ready = this.id.then(K(this));
+    this.ready = this.id.then(() => this);
   }
 
   /**
@@ -113,7 +113,7 @@ export class RemoteObject {
    */
   destroy() {
     this.id.then(id => {
-      sdk.notify(this.constructor.interfaceName + ':~');
+      this.bridge.notify(this.interfaceName + ':~');
       remoteObjectInstances[id] = null;
     });
   }

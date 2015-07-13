@@ -1,10 +1,9 @@
-import { InterfaceName, Properties, RemoteObject } from '../src/RemoteObject.es6';
-import * as type from '../src/type.es6';
+import { InterfaceName, Properties, RemoteObject } from '../src/objects.es6';
+import * as type from '../src/types.es6';
 
-import { Promise } from '../src/rpc.es6';
-import log from '../src/logger.es6';
+import { BaseBridge } from '../src/bridges.es6';
 
-import sdk, { K } from '../src/rpc.es6';
+const sdk = new BaseBridge();
 
 describe("RemoteObject", function () {
 
@@ -31,6 +30,7 @@ describe("RemoteObject", function () {
   });
 
   // Test class for tests.
+  @sdk.exposeClass
   @InterfaceName("wisp.test.EmptyObject")
   @Properties({
     name: type.string
@@ -65,7 +65,7 @@ describe("RemoteObject", function () {
   it("`ready` property is a Promise for the resolved instance", function (done) {
     var newInstance = new TestRemoteObject();
 
-    expect(newInstance.ready instanceof Promise.constructor).toBeTruthy();
+    expect(newInstance.ready instanceof Promise).toBeTruthy();
 
     newInstance.ready.then(instance => {
       expect(instance instanceof RemoteObject).toBeTruthy();
