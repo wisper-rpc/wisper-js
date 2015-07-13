@@ -1,4 +1,7 @@
-import { K, map, every, typeOf } from './rpc.es6';
+import mapValues from 'lodash/object/mapValues';
+import every from 'lodash/collection/every';
+import clone from 'lodash/lang/cloneDeep';
+import isObject from 'lodash/lang/isPlainObject';
 
 // A `type` has the following properties:
 //   writable     : boolean
@@ -25,18 +28,19 @@ const invalidDefault = new TypeError("Invalid default value for type.");
 const invalidProperties = new TypeError("Invalid object structure for properties argument.");
 const invalidBaseType = new TypeError("Invalid base type.");
 
+
 // The `any` type is at the top of the hierarchy.
 // All values are valid, but it has no default.
 const any = {
   writable: true,
-  valid: K(true),
+  valid: () => true,
   default: function (val) {
     if (!this.valid(val)) {
       throw invalidDefault;
     }
 
     const type = Object.create(this);
-    type.defaultValue = K(val);
+    type.defaultValue = () => clone(val);
     return type;
   }
 };
@@ -45,10 +49,11 @@ const any = {
 // Creates a new type from a default value and a checker function.
 function newtype(defaultValue, checker) {
   const type = Object.create(any);
-  type.defaultValue = K(defaultValue);
+  type.defaultValue = () => defaultValue;
   type.valid = checker;
   return type;
 }
+
 
 // Check the type is valid or not
 function isType(type) {
@@ -92,39 +97,24 @@ export function array(baseType) {
   return type;
 }
 
+
 // Creates a new composite type of the given object structure.
 // The given value must be an object with only properties.
-//
-// When creating object-types with default values, do:
-//
-// let point = object({
-//   x: number.default(5),
-//   y: number.default(2)
-// });
-//
-// Don't:
-//
-// let point = object({
-//   x: number,
-//   y: number
-// }).default({ x: 5, y: 2 });
-//
-// This would result in the same default object being reused
-// across different objects.
 export function object(properties) {
-  if (typeOf(properties) !== 'object' || !every(properties, isType)) {
+  if (!isObject(properties) || !every(properties, isType)) {
     throw invalidProperties;
   }
 
   const type = Object.create(any);
 
   type.valid = val =>
-    typeOf(val) === 'object' &&
+    isObject(val) &&
     every(properties, (baseType, key) => baseType.valid(val[key]));
 
-  type.defaultValue = () => map(properties, baseType => baseType.defaultValue());
+  type.defaultValue = () => mapValues(properties, baseType => baseType.defaultValue());
   return type;
 }
+
 
 // Creates a type that is nullable of the given `baseType`.
 export function nullable(baseType) {

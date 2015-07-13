@@ -1,4 +1,4 @@
-import { string, number, boolean, readonly, array, object, nullable } from '../src/type.es6';
+import { string, number, boolean, readonly, array, object, nullable } from '../src/types.es6';
 
 describe('type', function () {
   function all(arr) {
