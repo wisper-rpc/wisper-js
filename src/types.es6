@@ -55,15 +55,13 @@ function newtype(defaultValue, checker) {
 }
 
 
-// Check the type is valid or not
-function isType(type) {
-  if (!type) {
-    return false;
-  } else if (type === any) {
-    return true;
-  } else {
-    return isType(Object.getPrototypeOf(type));
-  }
+// Check if the argument is a valid type.
+export function isType(type) {
+  if (!type) return false;
+
+  if (type === any) return true;
+
+  return type === Object(type) && isType(Object.getPrototypeOf(type));
 }
 
 

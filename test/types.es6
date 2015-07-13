@@ -1,9 +1,27 @@
-import { string, number, boolean, readonly, array, object, nullable } from '../src/types.es6';
+import { string, number, boolean, readonly, array, object, nullable, isType } from '../src/types.es6';
 
 describe('type', function () {
   function all(arr) {
     return arr.reduce((a, b) => a && b, true)
   }
+
+
+  it('knows what types are', function () {
+    expect([
+      number,
+      string,
+      {},
+      1,
+      null
+    ].map(isType)).toEqual([
+      true,
+      true,
+      false,
+      false,
+      false
+    ]);
+  });
+
 
   it('defines basic types: string, number & boolean', function () {
     expect(all([
