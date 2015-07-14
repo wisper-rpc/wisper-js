@@ -1,4 +1,4 @@
-import { string, number, boolean, readonly, array, object, nullable, isType } from '../src/types.es6';
+import { any, string, number, boolean, readonly, array, object, nullable, isType } from '../src/types.es6';
 
 describe('type', function () {
   function all(arr) {
@@ -25,6 +25,11 @@ describe('type', function () {
 
   it('defines basic types: string, number & boolean', function () {
     expect(all([
+      any.valid(''),
+      any.valid(true),
+      any.valid(false),
+      any.valid(6),
+
       string.valid(''),
       !string.valid(true),
       !string.valid(false),
@@ -62,6 +67,12 @@ describe('type', function () {
       boolean.default(true),
       number.default(10)
     ].map(x => x.defaultValue())).toEqual(['cute cats', true, 10]);
+  });
+
+
+  it('throws exceptions if given invalid defaults', function () {
+    expect(() => number.default('yo')).toThrow();
+    expect(() => object({ x: number }).default(null)).toThrow();
   });
 
 
