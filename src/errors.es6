@@ -77,16 +77,25 @@ export class WisperError {
     this.data = data;
   }
 
-  // Casts a `WisperError` or a JavaScript `Error` to a `WisperError`.
+  // Casts a `WisperError`-like object to an actual `WisperError`.
   static cast(error) {
-    if (error instanceof WisperError) {
-      return error;
-    }
+    if (error instanceof WisperError) return error;
 
     if (error instanceof Error) {
       return new WisperError(domain.JavaScript,
         jsErrors.indexOf(error.name.slice(0, -5)),
         error.message);
     }
+
+    // It's a plain object.
+    const err = new WisperError(
+      error.domain, error.code, error.message,
+      error.underlying ? WisperError.cast(error.underlying) : undefined,
+      error.data);
+
+    // Set the `name` property if the error name isn't locally available.
+    err.name = err.name || error.name;
+
+    return err;
   }
 }
