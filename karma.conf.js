@@ -75,6 +75,7 @@ module.exports = function(karma) {
       reporters: [
         {
           type : 'cobertura',
+          subdir: normalizeBrowserName,
           dir : 'reports/coverage/'
         }
       ]
