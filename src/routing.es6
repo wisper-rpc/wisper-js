@@ -9,7 +9,7 @@ export class Namespace {
 
   route(path, msg) {
     if (!path) {
-      return Promise.reject(new WisperError(domain.protocol,
+      return Promise.reject(new WisperError(domain.Protocol,
         code.missingProcedure, `Invalid path '${msg.method}'!`));
     }
 
@@ -19,7 +19,7 @@ export class Namespace {
     const handler = this.routes[step];
 
     if (!handler) {
-      return Promise.reject(new WisperError(domain.protocol,
+      return Promise.reject(new WisperError(domain.Protocol,
         code.missingProcedure, `No route for '${msg.method}'!`));
     }
 
