@@ -1,8 +1,10 @@
 import set from 'lodash/object/set';
 import noop from 'lodash/utility/noop';
 
+import EventEmitter from 'events';
+
 import { isResponse, isMessage, isPlainError, isResult } from './protocol.es6';
-import { Class, Namespace } from './routing.es6';
+import { ClassRouter, Namespace } from './routing.es6';
 import { WisperError, domain, code } from './errors.es6';
 
 
@@ -98,16 +100,19 @@ export class BaseBridge {
   // Decorator for `Remote` and `Local` classes. Binds the classes to the bridge.
   exposeClassAs(name) {
     return cls => {
+      if (!this.router.expose(name, ClassRouter.routing(name, cls))) {
+          console.error(`Route '${name}' already exposed.`);
+          return;
+      }
+
+      EventEmitter.call(cls);
+
       Object.defineProperty(cls, 'instances', { value: Object.create(null) });
 
       Object.defineProperties(cls.prototype, {
         'interfaceName': { value: name },
         'bridge':        { value: this }
       });
-
-      if (!this.router.expose(name, new Class(cls))) {
-          console.error(`Route '${name}' already exposed.`);
-      }
     };
   }
 

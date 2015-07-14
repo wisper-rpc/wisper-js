@@ -1,4 +1,5 @@
 import forOwn from 'lodash/object/forOwn';
+import EventEmitter from 'events';
 
 const secretPrefix = '_';
 
@@ -43,13 +44,14 @@ const nextId = ((id) => () => String(++id))(0);
  *     }
  *   }
  */
-export class Remote {
+export class Remote extends EventEmitter {
 
   /**
    * @constructor
    * @param {Array<?>} args
    */
   constructor(args=[]) {
+    super();
     this.id = this.bridge.invoke(this.interfaceName + '~', args).then(result => {
       forOwn(result.props, (val, key) => {
         this[secretPrefix + key] = val;
@@ -78,8 +80,9 @@ export class Remote {
 }
 
 
-export class Local {
+export class Local extends EventEmitter {
   constructor() {
+    super();
     this.id = Promise.resolve(this._id = nextId());
     this.ready = Promise.resolve(this);
   }

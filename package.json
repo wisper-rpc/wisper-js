@@ -26,6 +26,7 @@
     "karma-jasmine": "^0.3.6"
   },
   "dependencies": {
+    "events": "^1.0.2",
     "lodash": "^3.10.0"
   }
 }
