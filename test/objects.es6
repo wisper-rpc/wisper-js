@@ -1,57 +1,78 @@
-import { InterfaceName, Properties, Remote } from '../src/objects.es6';
-import * as type from '../src/types.es6';
+import { Properties, Remote, Local } from '../src/objects.es6';
+import { string, number } from '../src/types.es6';
+import signature from '../src/signature.es6';
 
 import { BaseBridge } from '../src/bridges.es6';
 
 const sdk = new BaseBridge();
 
-describe("RemoteObject", function () {
+var nextId = 0;
+var lastMessage;
 
-  // Override `sdk.rpc` before each test, and reset it afterwards.
-  const sdk_rpc = sdk.rpc,
-    sdk_notify = sdk.notify;
+sdk.notify = sdk.invoke = function (method, params) {
+  lastMessage = { method, params };
 
-  var nextId = 0;
-  var lastMessage;
-
-  beforeEach(function () {
-    sdk.notify = sdk.invoke = function (method, params) {
-      lastMessage = { method, params };
-
-      return Promise.resolve({
-        id: String(nextId++)
-      });
-    };
-
-    sdk.notifyAsync = sdk.invokeAsync = function (method, params) {
-      return Promise.all(params).then(this.invoke.bind(this, method));
-    };
+  return Promise.resolve({
+    id: String(nextId++)
   });
+};
 
-  afterEach(function () {
-    sdk.rpc = sdk_rpc;
-    sdk.notify = sdk_notify;
-  });
+sdk.notifyAsync = sdk.invokeAsync = function (method, params) {
+  return Promise.all(params).then(this.invoke.bind(this, method));
+};
 
-  // Test class for tests.
-  @sdk.exposeClass
-  @InterfaceName("wisp.test.EmptyObject")
-  @Properties({
-    name: type.string
-  })
-  class TestRemoteObject extends Remote {
-    constructor() {
-      super();
-    }
+
+// Test class for Remotes.
+@sdk.exposeClassAs("wisp.test.EmptyObject")
+@Properties({
+  name: string
+})
+class TestRemoteObject extends Remote {
+  constructor() {
+    super();
+  }
+}
+
+// Test class for Locals.
+@sdk.exposeClassAs('wisp.test.Adder')
+class Adder extends Local {
+  constructor() {
+    super();
+    this.x = 5;
   }
 
+  @signature([ number ], number)
+  add(y) {
+    return this.x + y;
+  }
+
+  @signature([ number, number ], number)
+  static add(x, y) {
+    return x + y;
+  }
+}
+
+// Set the `bridge` properties of the test classes.
+// Adder.prototype.bridge = TestRemoteObject.prototype.bridge = sdk;
+
+
+describe('LocalObject', function () {
+  it('constructor should return its own instance', function () {
+    expect(new Adder() instanceof Local).toBeTruthy();
+    expect(new Adder() instanceof Adder).toBeTruthy();
+  });
+});
+
+
+describe("RemoteObject", function () {
+  const instance = new TestRemoteObject();
+
   it("constructor should return its own instance", function () {
-    expect(new TestRemoteObject() instanceof Remote).toBeTruthy();
+    expect(instance instanceof Remote).toBeTruthy();
+    expect(instance instanceof TestRemoteObject).toBeTruthy();
   });
 
   it('should create properties from annotations', function (done) {
-    const instance = new TestRemoteObject();
-
     expect(typeof instance.name).toEqual('string');
     expect(instance.name).toEqual('');
 
@@ -60,7 +81,7 @@ describe("RemoteObject", function () {
     setTimeout(() => {
       expect(lastMessage).toEqual({
         method: 'wisp.test.EmptyObject:!',
-        params: [ '1', 'name', 'Charlie' ]
+        params: [ '0', 'name', 'Charlie' ]
       });
       done();
     }, 20);

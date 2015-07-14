@@ -3,60 +3,13 @@ import forOwn from 'lodash/object/forOwn';
 const secretPrefix = '_';
 
 
-// The `InterfaceName` decorator registers the Remote
-// under the given `name`.
-export function InterfaceName(name) {
-  return cls => {
-    Object.defineProperty(cls, 'instances', { value: Object.create(null) });
-    cls.prototype.interfaceName = name;
-  };
-}
-
-
-// The `Properties` decorator adds properties to the prototype
-// of the decorated class. It automatically dispatches events
-// over RPC whenever these properties are modified.
-export function Properties(properties) {
-  return cls => {
-    // Setup default values for properties on prototype.
-    forOwn(properties, (type, key) => {
-      Object.defineProperty(cls.prototype, secretPrefix + key, {
-        writable: true,
-        value: type.defaultValue()
-      });
-
-      Object.defineProperty(cls.prototype, key, descriptor(cls, key, type));
-    });
-  }
-}
-
-
-// Creates a property descriptor from a type and key.
-function descriptor(cls, key, type) {
-  const secretKey = secretPrefix + key;
-
-  const descriptor = {
-    get() {
-      return this[secretKey];
-    }
-  };
-
-  if (type.writable) {
-    descriptor.set = function (value) {
-      if (type.valid(value)) {
-        this[secretKey] = value;
-        this.bridge.notifyAsync(this.interfaceName + ':!', [this.id, key, value]);
-      }
-    };
-  }
-
-  return descriptor;
-}
+// Id generator for integer strings starting at '0'.
+const nextId = ((id) => () => String(++id))(0);
 
 
 /**
  * Base-class for Remotes. Create new Remotes by extending and
- * decorating the class with `@InterfaceName` and `@<wisper.Bridge>.exposeClass`.
+ * decorating the class with `@<wisper.Bridge>.exposeClassAs`.
  * Remotes have the following key properties, which shouldn't be overriden:
  *
  * On each instance:
@@ -76,8 +29,7 @@ function descriptor(cls, key, type) {
  *
  *   import bridge from './some-bridge.es6';
  *
- *   @sdk.exposeClass
- *   @InterfaceName('wisp.ai.Audio')
+ *   @bridge.exposeClassAs('wisp.ai.Audio')
  *   @Properties({
  *     src: string
  *   })
@@ -123,4 +75,53 @@ export class Remote {
       delete this.constructor.instances[id];
     });
   }
+}
+
+
+export class Local {
+  constructor() {
+    this.id = Promise.resolve(this._id = nextId());
+    this.ready = Promise.resolve(this);
+  }
+}
+
+
+// The `Properties` decorator adds properties to the prototype
+// of the decorated class. It automatically dispatches events
+// over RPC whenever these properties are modified.
+export function Properties(properties) {
+  return cls => {
+    // Setup default values for properties on prototype.
+    forOwn(properties, (type, key) => {
+      Object.defineProperty(cls.prototype, secretPrefix + key, {
+        writable: true,
+        value: type.defaultValue()
+      });
+
+      Object.defineProperty(cls.prototype, key, descriptor(cls, key, type));
+    });
+  }
+}
+
+
+// Creates a property descriptor from a type and key.
+function descriptor(cls, key, type) {
+  const secretKey = secretPrefix + key;
+
+  const descriptor = {
+    get() {
+      return this[secretKey];
+    }
+  };
+
+  if (type.writable) {
+    descriptor.set = function (value) {
+      if (type.valid(value)) {
+        this[secretKey] = value;
+        this.bridge.notifyAsync(this.interfaceName + ':!', [this.id, key, value]);
+      }
+    };
+  }
+
+  return descriptor;
 }
