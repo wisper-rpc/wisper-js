@@ -1,7 +1,7 @@
 import set from 'lodash/object/set';
 import noop from 'lodash/utility/noop';
 
-import { isResponse, isMessage, isPlainError } from './protocol.es6';
+import { isResponse, isMessage, isPlainError, isResult } from './protocol.es6';
 import { Class, Namespace } from './routing.es6';
 import { WisperError, domain, code } from './errors.es6';
 
@@ -85,7 +85,9 @@ export class BaseBridge {
     delete this.waiting[msg.id]
 
     if (waiting) {
-      isError(msg) ? waiting.reject(msg.error) : waiting.resolve(msg.result);
+      isResult(msg) ?
+        waiting.resolve(msg.result) :
+        waiting.reject(WisperError.cast(msg.error));
     } else {
       this.sendError(msg.id, new WisperError(domain.Protocol, code.oddResponse,
         `Got unexpected response for id: '${msg.id}', but no request was made.`));
@@ -93,12 +95,20 @@ export class BaseBridge {
   }
 
 
-  exposeClass(cls) {
-    Object.defineProperty(cls.prototype, 'bridge', { value: this });
+  // Decorator for `Remote` and `Local` classes. Binds the classes to the bridge.
+  exposeClassAs(name) {
+    return cls => {
+      Object.defineProperty(cls, 'instances', { value: Object.create(null) });
 
-    if (!this.router.expose(cls.prototype.interfaceName, new Class(cls))) {
-        console.error(`Route '${cls.prototype.interfaceName}' already exposed.`);
-    }
+      Object.defineProperties(cls.prototype, {
+        'interfaceName': { value: name },
+        'bridge':        { value: this }
+      });
+
+      if (!this.router.expose(name, new Class(cls))) {
+          console.error(`Route '${name}' already exposed.`);
+      }
+    };
   }
 
 

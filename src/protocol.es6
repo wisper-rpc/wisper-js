@@ -20,3 +20,8 @@ export function isPlainError(msg) {
 export function isResponse(msg) {
   return 'id' in msg && ('result' in msg || 'error' in msg);
 }
+
+
+export function isResult(msg) {
+  return 'id' in msg && 'result' in msg;
+}
