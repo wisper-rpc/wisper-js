@@ -46,7 +46,19 @@ describe('signature', function () {
     });
   });
 
-  it('should set properties on the annotated function', function () {
+  it('should set properties on classes', function () {
+    @signature([ number, number ])
+    class Point {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+      }
+    }
+
+    expect(Point.parameterTypes).toEqual([ number, number ]);
+  });
+
+  it('should set properties on methods', function () {
     let obj = {
       @signature([ number, number ], number)
       fn() {},
