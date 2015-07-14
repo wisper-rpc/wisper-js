@@ -3,9 +3,9 @@ import noop from 'lodash/utility/noop';
 
 import EventEmitter from 'events';
 
-import { isResponse, isMessage, isPlainError, isResult } from './protocol.es6';
-import { ClassRouter, Namespace } from './routing.es6';
-import { WisperError, domain, code } from './errors.es6';
+import { isResponse, isMessage, isPlainError, isResult } from './protocol';
+import { ClassRouter, Namespace } from './routing';
+import { WisperError, domain, code } from './errors';
 
 
 export class BaseBridge {

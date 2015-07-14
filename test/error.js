@@ -1,4 +1,4 @@
-import { WisperError, domain, code } from '../src/errors.es6';
+import { WisperError, domain, code } from '../src/errors';
 
 describe('WisperError', function () {
   const typeError = new WisperError(domain.JavaScript, code.type, "Expected number.");

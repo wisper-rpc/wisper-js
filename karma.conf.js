@@ -23,9 +23,7 @@ module.exports = function(karma) {
 
     // list of files / patterns to load in the browser
     files: [
-      // 'src/**/*.es6',
-      // 'test/init.js',
-      'test/**/*.es6'
+      'test/**/*.js'
     ],
 
     // list of files to exclude
@@ -35,22 +33,17 @@ module.exports = function(karma) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'test/**/*.es6': [ 'browserify' ],
+      'test/**/*.js': [ 'browserify' ],
       'dist/*.js': ['coverage']
     },
 
     browserify: {
-        extensions: [ '.es6' ],
         transform: [
             ['babelify', {
                 optional: [
                     'es7.decorators'
                 ]
             }]
-        ],
-        files: [
-            'src/**/*.es6',
-            'test/**/*Spec.es6'
         ],
         configure: function(bundle) {
             bundle.on('prebundle', function() {
@@ -73,6 +66,11 @@ module.exports = function(karma) {
 
     coverageReporter: {
       reporters: [
+        {
+          type : 'html',
+          subdir: normalizeBrowserName,
+          dir : 'reports/coverage/'
+        },
         {
           type : 'cobertura',
           subdir: normalizeBrowserName,

@@ -1,8 +1,8 @@
-import { Properties, Remote, Local } from '../src/objects.es6';
-import { string, number } from '../src/types.es6';
-import signature from '../src/signature.es6';
+import { Properties, Remote, Local } from '../src/objects';
+import { string, number } from '../src/types';
+import signature from '../src/signature';
 
-import { BaseBridge } from '../src/bridges.es6';
+import { BaseBridge } from '../src/bridges';
 
 const sdk = new BaseBridge();
 

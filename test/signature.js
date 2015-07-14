@@ -1,5 +1,5 @@
-import signature from '../src/signature.es6';
-import { number } from '../src/types.es6';
+import signature from '../src/signature';
+import { number } from '../src/types';
 
 describe('signature', function () {
   function should(val) {

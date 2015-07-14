@@ -1,4 +1,4 @@
-import { isType } from './types.es6';
+import { isType } from './types';
 
 
 const invalidSignature = new TypeError('`signature` takes array of parameter types, and an optional return type.');

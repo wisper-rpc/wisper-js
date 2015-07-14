@@ -1,4 +1,4 @@
-import split from '../src/split.es6';
+import split from '../src/split';
 
 it('split', function () {
   // Splits off the first identifier-like string, eating any dots.

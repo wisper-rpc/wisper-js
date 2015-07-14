@@ -1,4 +1,4 @@
-import { BaseBridge, GlobalBridge } from '../src/bridges.es6';
+import { BaseBridge, GlobalBridge } from '../src/bridges';
 
 describe('BaseBridge', function () {
   const bridge = new BaseBridge();

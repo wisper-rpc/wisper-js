@@ -1,5 +1,5 @@
-import split from "./split.es6";
-import { WisperError, domain, code } from './errors.es6';
+import split from "./split";
+import { WisperError, domain, code } from './errors';
 
 
 export class Namespace {
