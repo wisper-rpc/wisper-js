@@ -4,6 +4,7 @@ import { isType } from './types';
 const invalidSignature = new TypeError('`signature` takes array of parameter types, and an optional return type.');
 
 
+// Decorator to define the type `signature` for the decorated class or method.
 export default function signature(parameterTypes, returnType) {
   if (!Array.isArray(parameterTypes) || !parameterTypes.every(isType) ||
       (returnType && !isType(returnType))) {
