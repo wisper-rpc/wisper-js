@@ -25,3 +25,8 @@ export function isResponse(msg) {
 export function isResult(msg) {
   return 'id' in msg && 'result' in msg;
 }
+
+
+export function isError(msg) {
+  return 'id' in msg && 'error' in msg;
+}
