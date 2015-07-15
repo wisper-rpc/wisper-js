@@ -1,11 +1,10 @@
 import set from 'lodash/object/set';
-import noop from 'lodash/utility/noop';
-
-import EventEmitter from 'events';
-
-import { isResponse, isMessage, isPlainError, isResult } from './protocol';
-import { ClassRouter, Namespace } from './routing';
+import Namespace from './Namespace';
 import { WisperError, domain, code } from './errors';
+import { isResponse, isMessage, isPlainError, isResult } from './protocol';
+
+
+function noop() {}
 
 
 export class BaseBridge {
@@ -69,18 +68,15 @@ export class BaseBridge {
       // TODO: Improve error handling. Log for now.
       console.error(msg.error.name, msg.error.message);
     } else {
-      // TODO: Send responses if a Promise is returned.
       this.sendReponse(msg.id, this.router.route(msg.method, msg));
     }
   }
-
 
   sendReponse(id, promise) {
     promise && promise.catch(WisperError.cast).then(
       result => id && this.send({ id, result }),
       error => this.send({ id, error }));
   }
-
 
   handleResponse(msg) {
     const waiting = this.waiting[msg.id];
@@ -95,27 +91,6 @@ export class BaseBridge {
         `Got unexpected response for id: '${msg.id}', but no request was made.`));
     }
   }
-
-
-  // Decorator for `Remote` and `Local` classes. Binds the classes to the bridge.
-  exposeClassAs(name) {
-    return cls => {
-      if (!this.router.expose(name, ClassRouter.routing(name, cls))) {
-          console.error(`Route '${name}' already exposed.`);
-          return;
-      }
-
-      EventEmitter.call(cls);
-
-      Object.defineProperty(cls, 'instances', { value: Object.create(null) });
-
-      Object.defineProperties(cls.prototype, {
-        'interfaceName': { value: name },
-        'bridge':        { value: this }
-      });
-    };
-  }
-
 
   expose(path, handler) {
     return this.router.expose(path, handler);
