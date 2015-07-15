@@ -1,4 +1,4 @@
-import { BaseBridge, GlobalBridge } from '../src/bridges';
+import { BaseBridge, GlobalBridge, IframeBridge } from '../src/bridges';
 
 describe('BaseBridge', function () {
   const bridge = new BaseBridge();
@@ -36,6 +36,13 @@ describe('GlobalBridge', function () {
       params: [1, 2],
       id: 'base0'
     });
+
+    bridge.notify('method', [3, 4]);
+
+    expect(JSON.parse(lastJSON)).toEqual({
+      method: 'method',
+      params: [3, 4]
+    });
   });
 
   it('routes messages from the global receive function', function () {
@@ -47,12 +54,37 @@ describe('GlobalBridge', function () {
     });
 
     window.globalReceive(JSON.stringify(sentMsg));
-    // bridge.receive(sentMsg);
   });
 
   it('removes the function on close', function () {
     bridge.close();
 
     expect(window.globalReceive).toEqual(null);
+  });
+});
+
+
+describe('IframeBridge', function () {
+  // Route messages to my own window, i.e. to myself.
+  const bridge = new IframeBridge(window);
+  let lastArg;
+
+  it('posts messages to the target window', function (done) {
+    bridge.expose('self', function (path, msg) {
+      lastArg = msg.params[0];
+      done();
+    });
+
+    bridge.notify('self', [1]);
+  });
+
+  it('removes all event listeners on close', function (done) {
+    bridge.close();
+    bridge.notify('self', [2]);
+
+    setTimeout(() => {
+      expect(lastArg).toBe(1);
+      done();
+    }, 20);
   });
 });
