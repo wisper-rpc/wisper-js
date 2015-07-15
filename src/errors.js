@@ -68,10 +68,16 @@ const errorNames = [
 
 export class WisperError {
   constructor(domain, code, message, underlying, data) {
+    let name;
+
     this.domain = domain;
     this.code = code;
-    this.name = errorNames[domain][code] + 'Error';
+    this.name = '';
     this.message = message;
+
+    if (errorNames[domain] && (name = errorNames[domain][code]) != null) {
+      this.name = name + 'Error';
+    }
 
     this.underlying = underlying;
     this.data = data;
