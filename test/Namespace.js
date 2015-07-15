@@ -1,4 +1,4 @@
-import { Namespace } from '../src/routing';
+import Namespace from '../src/Namespace';
 
 describe('Namespace', function () {
   const ns = new Namespace();
@@ -10,6 +10,11 @@ describe('Namespace', function () {
       return path;
     }
   };
+
+
+  it('is an ES6 class', function () {
+    expect(Namespace).toThrow();
+  })
 
 
   it('initially has no routes', function () {
