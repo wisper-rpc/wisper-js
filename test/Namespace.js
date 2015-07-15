@@ -12,6 +12,11 @@ describe('Namespace', function () {
   };
 
 
+  it('is an ES6 class', function () {
+    expect(Namespace).toThrow();
+  })
+
+
   it('initially has no routes', function () {
     expect(Object.keys(ns.routes).length).toBe(0);
   });

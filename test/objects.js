@@ -1,15 +1,15 @@
-import { Properties, Remote, Local } from '../src/objects';
+import { Properties, Remote, Local, InterfaceName } from '../src/objects';
 import { string, number } from '../src/types';
 import signature from '../src/signature';
 
 import { BaseBridge } from '../src/bridges';
 
-const sdk = new BaseBridge();
+const bridge = new BaseBridge();
 
 var nextId = 0;
 var lastMessage;
 
-sdk.notify = sdk.invoke = function (method, params) {
+bridge.notify = bridge.invoke = function (method, params) {
   lastMessage = { method, params };
 
   return Promise.resolve({
@@ -17,13 +17,9 @@ sdk.notify = sdk.invoke = function (method, params) {
   });
 };
 
-sdk.notifyAsync = sdk.invokeAsync = function (method, params) {
-  return Promise.all(params).then(this.invoke.bind(this, method));
-};
-
 
 // Test class for Remotes.
-@sdk.exposeClassAs("wisp.test.EmptyObject")
+@InterfaceName(bridge, "wisp.test.EmptyObject")
 @Properties({
   name: string
 })
@@ -33,8 +29,9 @@ class TestRemoteObject extends Remote {
   }
 }
 
+
 // Test class for Locals.
-@sdk.exposeClassAs('wisp.test.Adder')
+@InterfaceName(bridge, 'wisp.test.Adder')
 class Adder extends Local {
   constructor() {
     super();
@@ -51,9 +48,6 @@ class Adder extends Local {
     return x + y;
   }
 }
-
-// Set the `bridge` properties of the test classes.
-// Adder.prototype.bridge = TestRemoteObject.prototype.bridge = sdk;
 
 
 describe('LocalObject', function () {
