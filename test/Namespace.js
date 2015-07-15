@@ -1,4 +1,4 @@
-import { Namespace } from '../src/routing';
+import Namespace from '../src/Namespace';
 
 describe('Namespace', function () {
   const ns = new Namespace();
