@@ -2,14 +2,17 @@ import set from 'lodash/object/set';
 import Namespace from './Namespace';
 import { WisperError, domain, code } from './errors';
 import { isResponse, isMessage, isPlainError, isResult } from './protocol';
-
+import stringId from './stringId';
 
 function noop() {}
 
 
+const nextBridgeId = stringId();
+
+
 export class BaseBridge {
   constructor() {
-    this.key = 'base';
+    this.id = this.constructor.name + nextBridgeId() + '-';
     this.count = 0;
 
     this.router = new Namespace();
@@ -18,7 +21,7 @@ export class BaseBridge {
   }
 
   nextId() {
-    return this.key + this.count++;
+    return this.id + this.count++;
   }
 
   send(msg) {

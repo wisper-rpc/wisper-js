@@ -31,11 +31,11 @@ describe('GlobalBridge', function () {
   it('sends messages using the given send function', function () {
     bridge.invoke('method', [1, 2]);
 
-    expect(JSON.parse(lastJSON)).toEqual({
-      method: 'method',
-      params: [1, 2],
-      id: 'base0'
-    });
+    const msg = JSON.parse(lastJSON);
+
+    expect(msg.id.startsWith('GlobalBridge')).toBeTruthy();
+    expect(msg.method).toEqual('method');
+    expect(msg.params).toEqual([1, 2]);
 
     bridge.notify('method', [3, 4]);
 
