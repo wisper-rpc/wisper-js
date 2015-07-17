@@ -1,5 +1,5 @@
-import forOwn from 'lodash/object/forOwn';
-import EventEmitter from 'events';
+import assign from 'lodash/object/assign';
+import Base from './Base';
 
 
 /**
@@ -17,7 +17,7 @@ import EventEmitter from 'events';
  * On the class:
  *   instances:     Object<string, instance>
  */
-export default class Remote extends EventEmitter {
+export default class Remote extends Base {
 
   /**
    * @constructor
@@ -26,11 +26,10 @@ export default class Remote extends EventEmitter {
   constructor(args=[]) {
     super();
     this.id = this.bridge.invoke(this.interfaceName + '~', args).then(result => {
-      forOwn(result.props, (val, key) => {
-        this['_' + key] = val;
-      });
+      // Set the local properties to those received.
+      assign(this._repr_.props, result.props);
       this.constructor.instances[result.id] = this;
-      return this._id = result.id;
+      return this._repr_.id = result.id;
     });
 
     this.ready = this.id.then(() => this);
@@ -43,8 +42,8 @@ export default class Remote extends EventEmitter {
   destroy() {
     this.id.then(id => {
       // Ensure `destroy` is only called once.
-      if (this._id !== id) return;
-      this._id = null;
+      if (this._repr_.id !== id) return;
+      this._repr_.id = null;
 
       this.bridge.notify(this.interfaceName + ':~', [id]);
       delete this.constructor.instances[id];

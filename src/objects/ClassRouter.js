@@ -38,18 +38,21 @@ const destroyedInstance = Promise.reject(new WisperError(domain.RemoteObject,
 
 
 export default class ClassRouter {
-  constructor(name, cls) {
+  constructor(bridge, name, cls) {
+    this.bridge = bridge;
     this.name = name;
     this.cls = cls;
+    this.instances = cls.instances || null;
   }
 
 
   // Returns a ClassRouter to do routing for `cls`.
-  static routing(name, cls) {
+  static routing(bridge, name, cls) {
     if (cls.prototype instanceof Local) {
-      return new LocalClassRouter(name, cls);
+      return new LocalClassRouter(bridge, name, cls);
     }
-    return new ClassRouter(name, cls);
+
+    return new ClassRouter(bridge, name, cls);
   }
 
 
@@ -74,7 +77,7 @@ export default class ClassRouter {
     }
 
     const id = msg.params[0],
-      instance = this.cls.instances[id];
+      instance = this.instances[id];
 
     if (!instance) {
       return Promise.reject(new WisperError(domain.RemoteObject,
@@ -161,25 +164,59 @@ export default class ClassRouter {
 }
 
 
+// LocalClassRouter is a router for the `Local` class.
+// It keeps track of the instances exposed through it.
 class LocalClassRouter extends ClassRouter {
+  constructor() {
+      super(...arguments);
+      this.instances = Object.create(null);
+
+      if (!this.cls.routers) {
+        this.cls.routers = Object.create(null);
+      }
+
+      this.cls.routers[this.bridge.id] = this;
+  }
+
+
+  // Adds the given local instance to the router,
+  // and informs the other end of it's existence.
+  addInstance(instance) {
+    const id = instance._repr_.id;
+
+    if (instance.bridge) {
+      throw new Error(`${this.name} instance '${id}' is already connected to a bridge.`);
+    }
+
+    // Bind the instance to this bridge.
+    instance.bridge = this.bridge;
+
+    // Track the instance.
+    this.instances[id] = instance;
+
+    // Inform the other end of the instance's existence.
+    this.bridge.notify(this.name + '!', ['~', instance._repr_]);
+  }
+
+
   constructInstance(args) {
-    const instance = new this.cls(...args);
+    // TODO: type checking of arguments.
 
-    this.cls.instances[instance._id] = instance;
+    // Create an instance.
+    const instance = Object.create(this.cls.prototype);
 
-    return instance.ready.then( instance => {
-      return {
-        id: instance.id,
-        props: {
-          // TODO: implement properties
-        }
-      };
+    // Safely, construct it from the given arguments.
+    return promisedApply(this.cls, instance, args).then(() => {
+      this.instances[instance._repr_.id] = instance;
+
+      // Once the instance is initialized, pass on it's representation.
+      return instance.ready.then( instance => instance._repr_);
     });
   }
 
 
   destroyInstance(instance) {
-    delete this.cls.instances[instance._id];
+    delete this.instances[instance._id];
     instance._id = null;
     instance.id = destroyedInstance;
   }

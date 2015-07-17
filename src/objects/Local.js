@@ -1,14 +1,21 @@
-import EventEmitter from 'events';
+import Base from './Base';
+import stringId from '../stringId';
 
 
-// Id generator for integer strings starting at '0'.
-const nextId = ((id) => () => String(++id))(0);
+const nextId = stringId();
 
 
-export default class Local extends EventEmitter {
+export default class Local extends Base {
   constructor() {
     super();
-    this.id = Promise.resolve(this._id = nextId());
+    this.bridge = null;
+
+    this.id = Promise.resolve(this._repr_.id = nextId());
+  }
+
+  static routerThrough(bridge) {
+    // `this.routers` is dynamically created by `InterfaceName`.
+    return this.routers[bridge.id];
   }
 
   get ready() {

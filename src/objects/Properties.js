@@ -1,4 +1,5 @@
 import forOwn from 'lodash/object/forOwn';
+import mapValues from 'lodash/object/mapValues';
 
 
 // The `Properties` decorator adds properties to the prototype
@@ -7,12 +8,16 @@ import forOwn from 'lodash/object/forOwn';
 export default function Properties(properties) {
   return cls => {
     // Setup default values for properties on prototype.
-    forOwn(properties, (type, key) => {
-      Object.defineProperty(cls.prototype, '_' + key, {
-        writable: true,
-        value: type.defaultValue()
-      });
+    Object.defineProperty(cls.prototype, '_repr_', {
+      value: Object.create(cls.prototype._repr_)
+    });
 
+    Object.defineProperty(cls.prototype._repr_, 'props', {
+      enumerable: true,
+      value: mapValues(properties, type => type.defaultValue())
+    });
+
+    forOwn(properties, (type, key) => {
       Object.defineProperty(cls.prototype, key, descriptor(cls, key, type));
     });
   }
@@ -21,19 +26,17 @@ export default function Properties(properties) {
 
 // Creates a property descriptor from a type and key.
 function descriptor(cls, key, type) {
-  const secretKey = '_' + key;
-
   const descriptor = {
     get() {
-      return this[secretKey];
+      return this._repr_.props[key];
     }
   };
 
   if (type.writable) {
     descriptor.set = function (value) {
       if (type.valid(value)) {
-        this[secretKey] = value;
-        this.bridge.notifyAsync(this.interfaceName + ':!', [this.id, key, value]);
+        this._repr_.props[key] = value;
+        this.bridge && this.bridge.notifyAsync(this.interfaceName + ':!', [this.id, key, value]);
       }
     };
   }
