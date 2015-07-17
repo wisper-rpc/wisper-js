@@ -30,11 +30,15 @@ const invalidBaseType = new TypeError("Invalid base type.");
 
 
 // The `any` type is at the top of the hierarchy.
-// All values are valid, but it has no default.
+// All values are valid, but it has no default value.
 export const any = {
   writable: true,
-  valid: () => true,
-  default: function (val) {
+
+  valid(val) {
+    return true;
+  },
+
+  default(val) {
     if (!this.valid(val)) {
       throw invalidDefault;
     }
