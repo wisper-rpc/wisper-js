@@ -237,6 +237,8 @@ class LocalClassRouter extends ClassRouter {
     delete this.instances[instance[internal].id];
     instance[internal].id = null;
     instance.id = destroyedInstance;
+
+    instance.emit('destroy');
   }
 
 

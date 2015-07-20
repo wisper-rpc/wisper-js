@@ -2,7 +2,7 @@ import { any, string, number, boolean, readonly, array, object, nullable, isType
 
 describe('type', function () {
   function all(arr) {
-    return arr.reduce((a, b) => a && b, true)
+    return arr.reduce((a, b) => a && b, true);
   }
 
 
@@ -19,6 +19,17 @@ describe('type', function () {
       false,
       false,
       false
+    ]);
+  });
+
+
+  it('has names', function () {
+    expect([
+      any, string, number, boolean,
+      array(number), nullable(object({ x: number, y: number }))
+    ].map(t => t.name)).toEqual([
+      'any', 'string', 'number', 'boolean',
+      'array<number>', 'nullable<{ x: number, y: number }>'
     ]);
   });
 
@@ -92,14 +103,14 @@ describe('type', function () {
         func(type);
       } catch (e) {
         return e instanceof TypeError &&
-            (e.message == "Invalid base type." ||
-             e.message == "Invalid object structure for properties argument.")
+            (e.message === 'Invalid base type.' ||
+             e.message === 'Invalid object structure for properties argument.');
       }
       return false;
     }
 
     it('object', function () {
-      let default1 = person.defaultValue(),
+      const default1 = person.defaultValue(),
         default2 = person.defaultValue();
 
       // The properties assume their respective defaults.
@@ -115,7 +126,7 @@ describe('type', function () {
       expect(person.valid({ name: 'yo', age: '15' })).toBeFalsy();
 
       // Anything else should fail.
-      expect(person.valid("123")).toBeFalsy();
+      expect(person.valid('123')).toBeFalsy();
       expect(person.valid(123)).toBeFalsy();
       expect(person.valid(true)).toBeFalsy();
       expect(person.valid(null)).toBeFalsy();
@@ -159,7 +170,7 @@ describe('type', function () {
               first: string,
               last: string
             }),
-            do_something: function () {}
+            doSomething: function () {}
           }
       ].every(x => isFunctionThrowException(object, x))).toBeTruthy();
     });
@@ -177,7 +188,7 @@ describe('type', function () {
 
       // Anything else should fail.
       expect(nullablePerson.valid(1)).toBeFalsy();
-      expect(nullablePerson.valid("string")).toBeFalsy();
+      expect(nullablePerson.valid('string')).toBeFalsy();
       expect(nullablePerson.valid(undefined)).toBeFalsy();
     });
 

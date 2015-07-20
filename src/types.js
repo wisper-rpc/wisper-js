@@ -3,6 +3,7 @@ import every from 'lodash/collection/every';
 import clone from 'lodash/lang/cloneDeep';
 import isObject from 'lodash/lang/isPlainObject';
 
+
 // A `type` has the following properties:
 //   writable     : boolean
 //   defaultValue : () => type
@@ -24,9 +25,9 @@ import isObject from 'lodash/lang/isPlainObject';
 
 
 // The `TypeError` to throw when a default value is not a valid type.
-const invalidDefault = new TypeError("Invalid default value for type.");
-const invalidProperties = new TypeError("Invalid object structure for properties argument.");
-const invalidBaseType = new TypeError("Invalid base type.");
+const invalidDefault = new TypeError('Invalid default value for type.');
+const invalidProperties = new TypeError('Invalid object structure for properties argument.');
+const invalidBaseType = new TypeError('Invalid base type.');
 
 
 // The `any` type is at the top of the hierarchy.
@@ -34,45 +35,56 @@ const invalidBaseType = new TypeError("Invalid base type.");
 export const any = {
   writable: true,
 
-  valid(val) {
+  name: 'any',
+
+  valid() {
     return true;
   },
 
+  // Creates a new type, with `val` as the type's the default value.
   default(val) {
     if (!this.valid(val)) {
       throw invalidDefault;
     }
 
     const type = Object.create(this);
+
     type.defaultValue = () => clone(val);
+
     return type;
   }
 };
 
 
-// Creates a new type from a default value and a checker function.
-function newtype(defaultValue, checker) {
-  const type = Object.create(any);
-  type.defaultValue = () => defaultValue;
-  type.valid = checker;
-  return type;
-}
-
-
 // Check if the argument is a valid type.
 export function isType(type) {
-  if (!type) return false;
+  if (!type) {
+    return false;
+  }
 
-  if (type === any) return true;
+  if (type === any) {
+    return true;
+  }
 
   return type === Object(type) && isType(Object.getPrototypeOf(type));
 }
 
 
-// Primitive types
-export const string  = newtype('',    val => typeof val === 'string');
-export const number  = newtype(0,     val => typeof val === 'number');
-export const boolean = newtype(false, val => typeof val === 'boolean');
+// Creates a primitive type from a name and a default value.
+function primitive(name, defaultValue) {
+  const type = Object.create(any);
+
+  type.name = name;
+  type.defaultValue = () => defaultValue;
+  type.valid = val => typeof val === name;
+
+  return type;
+}
+
+
+export const string = primitive('string', '');
+export const number = primitive('number', 0);
+export const boolean = primitive('boolean', false);
 
 
 // Modifies the given `baseType` to be read-only.
@@ -82,7 +94,10 @@ export function readonly(baseType) {
   }
 
   const type = Object.create(baseType);
+
+  type.name = `readonly<${baseType.name}>`;
   type.writable = false;
+
   return type;
 }
 
@@ -94,8 +109,11 @@ export function array(baseType) {
   }
 
   const type = Object.create(baseType);
-  type.valid = type => Array.isArray(type) && type.every(baseType.valid);
+
+  type.name = `array<${baseType.name}>`;
+  type.valid = val => Array.isArray(val) && val.every(baseType.valid);
   type.defaultValue = () => [];
+
   return type;
 }
 
@@ -109,11 +127,15 @@ export function object(properties) {
 
   const type = Object.create(any);
 
+  type.name = '{ ' + Object.keys(properties).map(key =>
+    key + ': ' + properties[key].name).join(', ') + ' }';
+
   type.valid = val =>
     isObject(val) &&
     every(properties, (baseType, key) => baseType.valid(val[key]));
 
   type.defaultValue = () => mapValues(properties, baseType => baseType.defaultValue());
+
   return type;
 }
 
@@ -125,16 +147,26 @@ export function nullable(baseType) {
   }
 
   const type = Object.create(baseType);
+
+  type.name = `nullable<${baseType.name}>`;
   type.valid = val => val === null || baseType.valid(val);
   type.defaultValue = () => null;
+
   return type;
 }
 
 
 // Creates a type that is satisfied by instances of `cls`.
 export function instance(cls) {
+  if (typeof cls !== 'function') {
+    throw invalidBaseType;
+  }
+
   const type = Object.create(any);
+
+  type.name = `instance<${cls.name}>`;
   type.valid = val => val === null || val instanceof cls;
   type.defaultValue = () => null;
+
   return type;
 }
