@@ -20,7 +20,7 @@ function propertyDescriptor(cls, key, type) {
 
         // If a bridge exists, notify of the change.
         if (this.bridge) {
-          this.bridge.notifyAsync(this.interfaceName + ':!', [this.id, key, value]);
+          this.dispatch(key, value);
         }
       }
     };

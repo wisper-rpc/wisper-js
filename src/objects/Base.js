@@ -12,6 +12,12 @@ export default class Base extends EventEmitter {
     this[internal] = Object.create(this[internal]);
     this[internal].props = props;
   }
+
+
+  // Dispatch an event from this instance across the bridge.
+  dispatch(type, value) {
+    this.bridge.notifyAsync(this.interfaceName + ':!', [this.id, type, value]);
+  }
 }
 
 Base.prototype[internal] = Object.create(Object.prototype);
