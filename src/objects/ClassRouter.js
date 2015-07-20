@@ -114,9 +114,11 @@ export default class ClassRouter {
 
   // Dispatch an event on `instance` with the given `type` and `value`.
   instanceEvent(instance, type, value) {
-    // If the instance has a secret property `type`, set its value.
-    if ('_' + type in instance) {
-      instance['_' + type] = value;
+    const props = instance[internal].props;
+
+    // If the instance has an internal property `type`, set its value.
+    if (type in props) {
+      props[type] = value;
     }
 
     instance.emit(type, value);
