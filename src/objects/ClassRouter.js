@@ -192,6 +192,13 @@ class LocalClassRouter extends ClassRouter {
   }
 
 
+  // Bind the instance to this bridge, and set its interface name.
+  bindInstance(instance) {
+    instance.bridge = this.bridge;
+    instance.interfaceName = this.name;
+  }
+
+
   // Adds the given local instance to the router,
   // and informs the other end of it's existence.
   addInstance(instance) {
@@ -201,8 +208,7 @@ class LocalClassRouter extends ClassRouter {
       throw new Error(`${this.name} instance '${id}' is already connected to a bridge.`);
     }
 
-    // Bind the instance to this bridge.
-    instance.bridge = this.bridge;
+    this.bindInstance(instance);
 
     // Track the instance.
     this.instances[id] = instance;
@@ -218,6 +224,8 @@ class LocalClassRouter extends ClassRouter {
     // Safely, construct it from the given arguments.
     return promisedConstruct(this.cls, args).then( instance => {
       this.instances[instance[internal].id] = instance;
+
+      this.bindInstance(instance);
 
       // Once the instance is initialized, pass on it's representation.
       return instance.ready.then(() => instance[internal]);

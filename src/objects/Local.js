@@ -10,6 +10,7 @@ export default class Local extends Base {
   constructor() {
     super();
     this.bridge = null;
+    this.interfaceName = '';
 
     this.id = Promise.resolve(this[internal].id = nextId());
   }
