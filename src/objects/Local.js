@@ -1,4 +1,5 @@
 import Base from './Base';
+import internal from './internal';
 import stringId from '../stringId';
 
 
@@ -10,11 +11,11 @@ export default class Local extends Base {
     super();
     this.bridge = null;
 
-    this.id = Promise.resolve(this._repr_.id = nextId());
+    this.id = Promise.resolve(this[internal].id = nextId());
   }
 
   static routerThrough(bridge) {
-    // `this.routers` is dynamically created by `InterfaceName`.
+    // `this.routers` is dynamically created by `interfaceName`.
     return this.routers[bridge.id];
   }
 

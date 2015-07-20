@@ -1,5 +1,6 @@
-import { Properties, Local, InterfaceName } from '../../src/objects';
-import { string, number } from '../../src/types';
+import internal from '../../src/objects/internal';
+import { properties, Local, interfaceName } from '../../src/objects';
+import { number } from '../../src/types';
 import signature from '../../src/signature';
 
 import { BaseBridge } from '../../src/bridges';
@@ -23,8 +24,8 @@ bridge.notify = bridge.invoke = function (method, params) {
 
 
 // Test class for Locals.
-@InterfaceName(bridge, 'wisp.test.Adder')
-@Properties({
+@interfaceName(bridge, 'wisp.test.Adder')
+@properties({
   x: number
 })
 class Adder extends Local {
@@ -44,7 +45,7 @@ class Adder extends Local {
   }
 }
 
-@InterfaceName(bridge, 'wisp.test.Adder2')
+@interfaceName(bridge, 'wisp.test.Adder2')
 class Adder2 extends Adder {}
 
 
@@ -58,10 +59,11 @@ describe('LocalObject', function () {
     messages = [];
 
     const adder = new Adder();
+
     expect(adder instanceof Local).toBeTruthy();
     expect(adder instanceof Adder).toBeTruthy();
 
-    expect(adder._repr_.id).not.toBeUndefined();
+    expect(adder[internal].id).not.toBeUndefined();
 
     expect(adder.bridge).toBeNull();
 
@@ -77,7 +79,7 @@ describe('LocalObject', function () {
       expect(lastMessage().method).toBe('wisp.test.Adder!');
       expect(lastMessage().params[0]).toEqual('~');
       expect(lastMessage().params[1]).toEqual({
-        id: adder._repr_.id,
+        id: adder[internal].id,
         props: {
           x: 5
         }

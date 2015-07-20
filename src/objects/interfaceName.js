@@ -5,13 +5,12 @@ import Remote from './Remote';
 
 // Decorator for `Remote` and `Local` classes.
 // Exposes the classes through the bridge.
-export default function InterfaceName(bridge, name) {
+export default function interfaceName(bridge, name) {
   return cls => {
     const router = ClassRouter.routing(bridge, name, cls);
 
     if (!bridge.expose(name, router)) {
-        console.error(`Route '${name}' already exposed.`);
-        return;
+      throw new Error(`Route '${name}' already exposed.`);
     }
 
     // Constructor be called several times on same object.
@@ -23,7 +22,7 @@ export default function InterfaceName(bridge, name) {
 
       Object.defineProperties(cls.prototype, {
         'interfaceName': { value: name },
-        'bridge':        { value: bridge }
+        'bridge': { value: bridge }
       });
     }
   };

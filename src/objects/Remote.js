@@ -1,6 +1,6 @@
 import assign from 'lodash/object/assign';
 import Base from './Base';
-
+import internal from './internal';
 
 /**
  * Base-class for Remotes.
@@ -26,10 +26,12 @@ export default class Remote extends Base {
   constructor(args=[]) {
     super();
     this.id = this.bridge.invoke(this.interfaceName + '~', args).then(result => {
+      const id = this[internal].id = result.id;
+
       // Set the local properties to those received.
-      assign(this._repr_.props, result.props);
+      assign(this[internal].props, result.props);
       this.constructor.instances[result.id] = this;
-      return this._repr_.id = result.id;
+      return id;
     });
 
     this.ready = this.id.then(() => this);
@@ -42,8 +44,8 @@ export default class Remote extends Base {
   destroy() {
     this.id.then(id => {
       // Ensure `destroy` is only called once.
-      if (this._repr_.id !== id) return;
-      this._repr_.id = null;
+      if (this[internal].id !== id) { return; }
+      this[internal].id = null;
 
       this.bridge.notify(this.interfaceName + ':~', [id]);
       delete this.constructor.instances[id];

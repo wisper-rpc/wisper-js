@@ -1,6 +1,6 @@
-import { Properties, Remote, InterfaceName } from '../../src/objects';
-import { string, number } from '../../src/types';
-import signature from '../../src/signature';
+import { properties, Remote, interfaceName } from '../../src/objects';
+import { string } from '../../src/types';
+// import signature from '../../src/signature';
 
 import { BaseBridge } from '../../src/bridges';
 
@@ -23,8 +23,8 @@ bridge.notify = bridge.invoke = function (method, params) {
 
 
 // Test class for Remotes.
-@InterfaceName(bridge, "wisp.test.EmptyObject")
-@Properties({
+@interfaceName(bridge, 'wisp.test.EmptyObject')
+@properties({
   name: string
 })
 class TestRemoteObject extends Remote {
@@ -34,30 +34,32 @@ class TestRemoteObject extends Remote {
 }
 
 
-describe("RemoteObject", function () {
-  const instance = new TestRemoteObject();
+describe('RemoteObject', function () {
+  it('constructor should return its own instance', function () {
+    const instance = new TestRemoteObject();
 
-  it("constructor should return its own instance", function () {
     expect(instance instanceof Remote).toBeTruthy();
     expect(instance instanceof TestRemoteObject).toBeTruthy();
   });
 
   it('should create properties from annotations', function (done) {
+    const instance = new TestRemoteObject();
+
     expect(typeof instance.name).toEqual('string');
     expect(instance.name).toEqual('');
 
-    instance.name = "Charlie";
+    instance.name = 'Charlie';
 
     setTimeout(() => {
       expect(lastMessage()).toEqual({
         method: 'wisp.test.EmptyObject:!',
-        params: [ '0', 'name', 'Charlie' ]
+        params: [ '1', 'name', 'Charlie' ]
       });
       done();
     }, 20);
   });
 
-  it("`ready` property is a Promise for the resolved instance", function (done) {
+  it('`ready` property is a Promise for the resolved instance', function (done) {
     var newInstance = new TestRemoteObject();
 
     expect(newInstance.ready instanceof Promise).toBeTruthy();

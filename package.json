@@ -15,8 +15,10 @@
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
+    "babel-eslint": "^3.1.23",
     "babelify": "^6.1.2",
     "browserify-istanbul": "^0.2.1",
+    "eslint": "^0.24.1",
     "jasmine-core": "^2.3.4",
     "karma": "^0.12.37",
     "karma-babel-preprocessor": "^5.2.1",

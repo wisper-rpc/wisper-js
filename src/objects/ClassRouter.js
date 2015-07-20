@@ -1,5 +1,6 @@
 import { WisperError, domain, code } from '../errors';
 import Local from './Local';
+import internal from './internal';
 
 
 // TODO: return null if invalid modifiers
@@ -7,12 +8,9 @@ function parse(path) {
   const instance = path[0] === ':',
     event = path.endsWith('!'),
     tilde = path.endsWith('~'),
-    method = path.slice(1);
+    method = (event || tilde) ? null : path.slice(instance);
 
-  return {
-    method: (event || tilde) ? null : path.slice(instance),
-    event, instance, tilde
-  };
+  return { method, event, instance, tilde };
 }
 
 
@@ -27,6 +25,17 @@ function promisedApply(func, ctx, args) {
     return Promise.reject(WisperError.cast(e));
   }
 }
+
+
+// Returns a Promise by calling `new constructor(...args)`.
+function promisedConstruct(Ctor, args) {
+  try {
+    return new Ctor(...args);
+  } catch (e) {
+    return Promise.reject(WisperError.cast(e));
+  }
+}
+
 
 
 // Error constants.
@@ -97,7 +106,7 @@ export default class ClassRouter {
 
 
   // Destroy the given `instance`.
-  destroyInstance(instance) {
+  destroyInstance() {
     return Promise.reject(new WisperError(domain.RemoteObject,
       code.generic, 'UNIMPLEMENTED: instance destruction'));
   }
@@ -115,7 +124,7 @@ export default class ClassRouter {
 
 
   // Call `instance`'s `method` with `args`.
-  instanceMethod(instance, method, args) {
+  instanceMethod(instance, method) {
     return Promise.reject(new WisperError(domain.RemoteObject,
       code.missingProcedure,
       `'${this.name}' instances have no method '${method}'.`));
@@ -135,8 +144,8 @@ export default class ClassRouter {
   }
 
 
-  // Construct an instance of `this.cls` with the given arguments.
-  constructInstance(args) {
+  // Construct an instance of `this.cls` with the given `args`.
+  constructInstance() {
     return Promise.reject(new WisperError(domain.RemoteObject,
       code.generic, // TODO: add `private-constructor` error code
       `The constructor for ${this.name} is private.`
@@ -159,6 +168,8 @@ export default class ClassRouter {
         `'${this.name}' has no static method '${method}'.`));
     }
 
+    // TODO: type checking of arguments.
+
     return promisedApply(func, this.cls, args);
   }
 }
@@ -171,7 +182,7 @@ class LocalClassRouter extends ClassRouter {
       super(...arguments);
       this.instances = Object.create(null);
 
-      if (!this.cls.routers) {
+      if (!this.cls.hasOwnProperty('routers')) {
         this.cls.routers = Object.create(null);
       }
 
@@ -182,7 +193,7 @@ class LocalClassRouter extends ClassRouter {
   // Adds the given local instance to the router,
   // and informs the other end of it's existence.
   addInstance(instance) {
-    const id = instance._repr_.id;
+    const id = instance[internal].id;
 
     if (instance.bridge) {
       throw new Error(`${this.name} instance '${id}' is already connected to a bridge.`);
@@ -195,29 +206,26 @@ class LocalClassRouter extends ClassRouter {
     this.instances[id] = instance;
 
     // Inform the other end of the instance's existence.
-    this.bridge.notify(this.name + '!', ['~', instance._repr_]);
+    this.bridge.notify(this.name + '!', ['~', instance[internal]]);
   }
 
 
   constructInstance(args) {
     // TODO: type checking of arguments.
 
-    // Create an instance.
-    const instance = Object.create(this.cls.prototype);
-
     // Safely, construct it from the given arguments.
-    return promisedApply(this.cls, instance, args).then(() => {
-      this.instances[instance._repr_.id] = instance;
+    return promisedConstruct(this.cls, args).then( instance => {
+      this.instances[instance[internal].id] = instance;
 
       // Once the instance is initialized, pass on it's representation.
-      return instance.ready.then( instance => instance._repr_);
+      return instance.ready.then(() => instance[internal]);
     });
   }
 
 
   destroyInstance(instance) {
-    delete this.instances[instance._id];
-    instance._id = null;
+    delete this.instances[instance[internal].id];
+    instance[internal].id = null;
     instance.id = destroyedInstance;
   }
 
@@ -230,6 +238,8 @@ class LocalClassRouter extends ClassRouter {
         code.missingProcedure,
         `'${this.name}' instances have no method '${method}'.`));
     }
+
+    // TODO: type checking of arguments.
 
     return promisedApply(func, instance, args);
   }

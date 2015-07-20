@@ -1,9 +1,10 @@
-import InterfaceName from './objects/InterfaceName';
+import interfaceName from './objects/InterfaceName';
 import Local from './objects/Local';
-import Properties from './objects/Properties';
+import properties from './objects/Properties';
 import Remote from './objects/Remote';
 
-export { Local, Remote, InterfaceName, Properties };
+
+export { Local, Remote, interfaceName, properties };
 
 
 // Decorator to mark methods of an exported class private, or `secret`.
