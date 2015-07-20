@@ -1,4 +1,4 @@
-import split from "./split";
+import split from './split';
 import { WisperError, domain, code } from './errors';
 
 

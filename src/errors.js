@@ -48,21 +48,21 @@ const errorNames = [
 
   // Protocol
   [
-  	'',
-  	'Parse',
-  	'Format',
-  	'MissingProcedure',
-  	'InvalidMessageType',
+    '',
+    'Parse',
+    'Format',
+    'MissingProcedure',
+    'InvalidMessageType',
     'OddResponse'
   ],
 
   // RemoteObject
   [
-  	'MissingClass',
-  	'InvalidInstance',
-  	'MissingProcedure',
-  	'InvalidArguments',
-  	'InvalidModifier'
+    'MissingClass',
+    'InvalidInstance',
+    'MissingProcedure',
+    'InvalidArguments',
+    'InvalidModifier'
   ]
 ];
 
@@ -75,7 +75,7 @@ export class WisperError {
     this.name = '';
     this.message = message;
 
-    if (errorNames[domain] && (name = errorNames[domain][code]) != null) {
+    if (errorNames[domain] && (name = errorNames[domain][code]) != null) {
       this.name = name + 'Error';
     }
 
@@ -85,7 +85,7 @@ export class WisperError {
 
   // Casts a `WisperError`-like object to an actual `WisperError`.
   static cast(error) {
-    if (error instanceof WisperError) return error;
+    if (error instanceof WisperError) { return error; }
 
     if (error instanceof Error) {
       return new WisperError(domain.JavaScript,

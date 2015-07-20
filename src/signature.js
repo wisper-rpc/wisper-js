@@ -15,7 +15,8 @@ export default function signature(parameterTypes, returnType) {
     // Methods decorators receive three parameters.
     // Class decorators receive only one.
     const func = descriptor ? descriptor.value : target;
+
     func.parameterTypes = parameterTypes;
     func.returnType = returnType;
-  }
+  };
 }

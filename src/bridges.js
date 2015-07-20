@@ -54,14 +54,14 @@ export class BaseBridge {
     try {
       this.receive(JSON.parse(json));
     } catch (e) {
-      this.send(WisperError.cast(e))
+      this.send(WisperError.cast(e));
     }
   }
 
   receive(msg) {
     if (!isMessage(msg)) {
       return this.send({
-        error: new WisperError(domain.Protocol, code.format, "Invalid message format")
+        error: new WisperError(domain.Protocol, code.format, 'Invalid message format')
       });
     }
 
@@ -76,19 +76,24 @@ export class BaseBridge {
   }
 
   sendReponse(id, promise) {
-    promise && promise.catch(WisperError.cast).then(
-      result => id && this.send({ id, result }),
-      error => this.send({ id, error }));
+    if (promise) {
+      promise.then(
+        result => id && this.send({ id, result }),
+        error => this.send({ id, error }));
+    }
   }
 
   handleResponse(msg) {
     const waiting = this.waiting[msg.id];
-    delete this.waiting[msg.id]
+
+    delete this.waiting[msg.id];
 
     if (waiting) {
-      isResult(msg) ?
-        waiting.resolve(msg.result) :
+      if (isResult(msg)) {
+        waiting.resolve(msg.result);
+      } else {
         waiting.reject(WisperError.cast(msg.error));
+      }
     } else {
       this.sendError(msg.id, new WisperError(domain.Protocol, code.oddResponse,
         `Got unexpected response for id: '${msg.id}', but no request was made.`));
@@ -109,7 +114,7 @@ export class GlobalBridge extends BaseBridge {
   constructor(receiveProperty, send) {
     super();
     set(window, this.receiveProperty = receiveProperty, json => {
-      this.receiveJSON(json)
+      this.receiveJSON(json);
     });
     this.sendJSON = send;
   }
@@ -126,7 +131,9 @@ export class IframeBridge extends BaseBridge {
     super();
     this.target = targetWindow;
     window.addEventListener('message', this.decoder = msg => {
-      (msg.source == this.target) && this.receiveJSON(msg.data);
+      if (msg.source === this.target) {
+        this.receiveJSON(msg.data);
+      }
     }, false);
   }
 
