@@ -1,11 +1,11 @@
 import forOwn from 'lodash/object/forOwn';
-import mapValues from 'lodash/object/mapValues';
 import internal from './internal';
 
 
 // Creates a property descriptor from a type and key.
 function propertyDescriptor(cls, key, type) {
   const descriptor = {
+    enumerable: true,
     get() {
       // Return the value from the internal properties.
       return this[internal].props[key];
@@ -38,12 +38,13 @@ export default function properties(definitions, maybeCls) {
   const decorator = cls => {
     // Setup default values for properties on prototype.
     Object.defineProperty(cls.prototype, internal, {
-      value: Object.create(cls.prototype[internal])
+      writable: true,
+      value: {}
     });
 
     Object.defineProperty(cls.prototype[internal], 'props', {
       enumerable: true,
-      value: mapValues(definitions, type => type.defaultValue())
+      value: definitions
     });
 
     forOwn(definitions, (type, key) => {

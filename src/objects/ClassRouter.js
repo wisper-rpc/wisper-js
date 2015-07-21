@@ -27,15 +27,51 @@ function promisedApply(func, ctx, args) {
 }
 
 
-// Returns a Promise by calling `new constructor(...args)`.
-function promisedConstruct(Ctor, args) {
+// Returns a Promise by calling `new Constructor(...args)`.
+function promisedConstruct(Constructor, args) {
   try {
-    return new Ctor(...args);
+    return new Constructor(...args);
   } catch (e) {
     return Promise.reject(WisperError.cast(e));
   }
 }
 
+
+// Returns a Promise for type-checked arguments, or a rejected promise.
+function typeCheck(instances, func, args) {
+  const types = func.parameterTypes,
+    n = types ? types.length : 0,
+    newArgs = args.slice(0);
+
+  for (let i = 0; i < n; i += 1) {
+    // Resolve references to instances.
+    if (types[i].instance) {
+      const instance = instances[args[i]];
+
+      if (types[i].valid(instance)) {
+        newArgs[i] = instance;
+        continue;
+      }
+
+      return Promise.reject(new WisperError(
+        domain.RemoteObject,
+        code.invalidInstance,
+        `No instance with id '${args[i]}'.`
+      ));
+    }
+
+    // Type-check other arguments.
+    if (!types[i].valid(newArgs[i])) {
+      return Promise.reject(new WisperError(
+        domain.RemoteObject,
+        code.invalidArguments,
+        `Expected argument #${i + 1} to be of type '${types[i].name}', got: ${JSON.stringify(args[i])}.`
+      ));
+    }
+  }
+
+  return Promise.resolve(newArgs);
+}
 
 
 // Error constants.
@@ -48,10 +84,14 @@ const destroyedInstance = Promise.reject(new WisperError(domain.RemoteObject,
 
 export default class ClassRouter {
   constructor(bridge, name, cls) {
+    if (!bridge.meta.instances) {
+      bridge.meta.instances = Object.create(null);
+    }
+
     this.bridge = bridge;
     this.name = name;
     this.cls = cls;
-    this.instances = cls.instances || null;
+    this.instances = bridge.meta.instances;
   }
 
 
@@ -61,7 +101,7 @@ export default class ClassRouter {
       return new LocalClassRouter(bridge, name, cls);
     }
 
-    return new ClassRouter(bridge, name, cls);
+    return new RemoteClassRouter(bridge, name, cls);
   }
 
 
@@ -74,6 +114,7 @@ export default class ClassRouter {
         code.invalidModifier, ''));
     }
 
+    // Is the target an instance or the class?
     return target.instance ?
       this.instanceRoute(target, msg) :
       this.staticRoute(target, msg);
@@ -88,7 +129,7 @@ export default class ClassRouter {
     const id = msg.params[0],
       instance = this.instances[id];
 
-    if (!instance) {
+    if (!(instance instanceof this.cls)) {
       return Promise.reject(new WisperError(domain.RemoteObject,
         code.invalidInstance, `No instance with id '${id}'.`));
     }
@@ -101,7 +142,7 @@ export default class ClassRouter {
       return this.instanceEvent(instance, msg.params[1], msg.params[2]);
     }
 
-    return this.instanceMethod(instance, target.method, msg.params);
+    return this.instanceMethod(instance, target.method, msg.params.slice(1));
   }
 
 
@@ -161,7 +202,7 @@ export default class ClassRouter {
   }
 
 
-  staticFunction(method, args) {
+  staticFunction(method, plainArgs) {
     const func = this.cls[method];
 
     if (typeof func !== 'function' || func.secret) {
@@ -170,10 +211,23 @@ export default class ClassRouter {
         `'${this.name}' has no static method '${method}'.`));
     }
 
-    // TODO: type checking of arguments.
-
-    return promisedApply(func, this.cls, args);
+    return typeCheck(this.instances, func, plainArgs)
+      .then( args => promisedApply(func, this.cls, args));
   }
+}
+
+
+class RemoteClassRouter extends ClassRouter {
+    constructor() {
+      super(...arguments);
+
+      this.cls.instances = this.instances;
+
+      Object.defineProperties(this.cls.prototype, {
+        interfaceName: { value: this.name },
+        bridge: { value: this.bridge }
+      });
+    }
 }
 
 
@@ -181,21 +235,24 @@ export default class ClassRouter {
 // It keeps track of the instances exposed through it.
 class LocalClassRouter extends ClassRouter {
   constructor() {
-      super(...arguments);
-      this.instances = Object.create(null);
+    super(...arguments);
 
-      if (!this.cls.hasOwnProperty('routers')) {
-        this.cls.routers = Object.create(null);
-      }
+    if (!this.cls.hasOwnProperty('routers')) {
+      this.cls.routers = Object.create(null);
+    }
 
-      this.cls.routers[this.bridge.id] = this;
+    this.cls.routers[this.bridge.id] = this;
   }
 
 
   // Bind the instance to this bridge, and set its interface name.
-  bindInstance(instance) {
+  bindInstance(id, instance) {
+    instance.instances = this.instances;
     instance.bridge = this.bridge;
     instance.interfaceName = this.name;
+
+    // Track the instance.
+    this.instances[id] = instance;
   }
 
 
@@ -208,28 +265,25 @@ class LocalClassRouter extends ClassRouter {
       throw new Error(`${this.name} instance '${id}' is already connected to a bridge.`);
     }
 
-    this.bindInstance(instance);
-
-    // Track the instance.
-    this.instances[id] = instance;
+    this.bindInstance(id, instance);
 
     // Inform the other end of the instance's existence.
     this.bridge.notify(this.name + '!', ['~', instance[internal]]);
+
+    return this;
   }
 
 
-  constructInstance(args) {
-    // TODO: type checking of arguments.
+  constructInstance(plainArgs) {
+    // Safely, construct an instance from the given arguments.
+    return typeCheck(this.instances, this.cls, plainArgs)
+      .then( args => promisedConstruct(this.cls, args))
+      .then( instance => {
+        this.bindInstance(instance[internal].id, instance);
 
-    // Safely, construct it from the given arguments.
-    return promisedConstruct(this.cls, args).then( instance => {
-      this.instances[instance[internal].id] = instance;
-
-      this.bindInstance(instance);
-
-      // Once the instance is initialized, pass on it's representation.
-      return instance.ready.then(() => instance[internal]);
-    });
+        // Once the instance is initialized, pass on it's representation.
+        return instance.ready.then(() => instance[internal]);
+      });
   }
 
 
@@ -242,7 +296,7 @@ class LocalClassRouter extends ClassRouter {
   }
 
 
-  instanceMethod(instance, method, args) {
+  instanceMethod(instance, method, plainArgs) {
     const func = this.cls.prototype[method];
 
     if (typeof func !== 'function' || func.secret) {
@@ -251,8 +305,7 @@ class LocalClassRouter extends ClassRouter {
         `'${this.name}' instances have no method '${method}'.`));
     }
 
-    // TODO: type checking of arguments.
-
-    return promisedApply(func, instance, args);
+    return typeCheck(this.instances, func, plainArgs)
+      .then( args => promisedApply(func, instance, args));
   }
 }

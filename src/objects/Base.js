@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
 import internal from './internal';
+import mapValues from 'lodash/object/mapValues';
 
 
 export default class Base extends EventEmitter {
@@ -7,10 +8,12 @@ export default class Base extends EventEmitter {
     super();
 
     // Create the instance's `internal` property.
-    const props = Object.create(this[internal].props);
-
-    this[internal] = Object.create(this[internal]);
-    this[internal].props = props;
+    this[internal] = Object.create(this[internal], {
+      props: {
+        // Set defaults.
+        value: mapValues(this[internal].props, type => type.defaultValue())
+      }
+    });
   }
 
 
