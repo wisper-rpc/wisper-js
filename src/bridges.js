@@ -18,6 +18,9 @@ export class BaseBridge {
     this.router = new Namespace();
 
     this.waiting = Object.create(null);
+
+    // A meta property for attaching metadata.
+    this.meta = Object.create(null);
   }
 
   nextId() {
