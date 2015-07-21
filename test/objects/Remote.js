@@ -68,6 +68,7 @@ describe('RemoteObject', function () {
       expect(instance instanceof Remote).toBeTruthy();
 
       expect(lastMessage().method).toEqual('wisp.test.EmptyObject~');
-    }).then(done, done);
+      done();
+    }).catch(fail);
   });
 });
