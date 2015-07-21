@@ -3,10 +3,10 @@ import Namespace from '../src/Namespace';
 describe('Namespace', function () {
   const ns = new Namespace();
 
-  const func = (path, msg) => path + 2;
+  const func = (path) => path + 2;
 
   const router = {
-    route(path, msg) {
+    route(path) {
       return path;
     }
   };
@@ -14,7 +14,7 @@ describe('Namespace', function () {
 
   it('is an ES6 class', function () {
     expect(Namespace).toThrow();
-  })
+  });
 
 
   it('initially has no routes', function () {

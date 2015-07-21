@@ -8,7 +8,7 @@ describe('BaseBridge', function () {
       expect(data).toEqual({
         method: 'some',
         params: [false]
-      })
+      });
     };
 
     bridge.notify('some', [false]);

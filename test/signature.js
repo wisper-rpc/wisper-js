@@ -2,19 +2,19 @@ import signature from '../src/signature';
 import { number } from '../src/types';
 
 describe('signature', function () {
-  function should(val) {
+  function shouldAvoidThrow(val) {
     return ([params, returnType]) => {
       try {
-          signature(params, returnType);
-          return val;
+        signature(params, returnType);
+        return val;
       } catch (e) {
         return !val;
       }
-    }
+    };
   }
 
-  const shouldNotThrow = should(true);
-  const shouldThrow = should(false);
+  const shouldNotThrow = shouldAvoidThrow(true);
+  const shouldThrow = shouldAvoidThrow(false);
 
   describe('takes an array of types, and an optional return type', function () {
     // Arrays of arguments for signature.
@@ -25,7 +25,7 @@ describe('signature', function () {
           [ [] ],
 
           // return a number
-          [ [], number ],
+          [ [], number ]
       ];
 
       expect(correctArguments.every(shouldNotThrow)).toBeTruthy();
@@ -39,7 +39,7 @@ describe('signature', function () {
 
         [ [ 1 ] ],
 
-        [ [ number, 1 ] ],
+        [ [ number, 1 ] ]
       ];
 
       expect(invalidArguments.every(shouldThrow)).toBeTruthy();
@@ -59,7 +59,7 @@ describe('signature', function () {
   });
 
   it('should set properties on methods', function () {
-    let obj = {
+    const obj = {
       @signature([ number, number ], number)
       fn() {},
 

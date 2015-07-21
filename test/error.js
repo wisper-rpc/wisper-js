@@ -1,7 +1,7 @@
 import { WisperError, domain, code } from '../src/errors';
 
 describe('WisperError', function () {
-  const typeError = new WisperError(domain.JavaScript, code.type, "Expected number.");
+  const typeError = new WisperError(domain.JavaScript, code.type, 'Expected number.');
 
 
   it('is an ES6 class', function () {
@@ -21,15 +21,15 @@ describe('WisperError', function () {
     expect(JSON.parse(JSON.stringify(typeError))).toEqual({
       domain: domain.JavaScript,
       code: code.type,
-      name: "TypeError",
-      message: "Expected number."
+      name: 'TypeError',
+      message: 'Expected number.'
     });
   });
 
 
   it('#cast', function () {
     // Native Errors are cast to WisperErrors.
-    expect(WisperError.cast(new TypeError("Expected number."))).toEqual(typeError);
+    expect(WisperError.cast(new TypeError('Expected number.'))).toEqual(typeError);
 
     // WisperErrors are returned as is.
     expect(WisperError.cast(typeError)).toEqual(typeError);
