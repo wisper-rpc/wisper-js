@@ -5,7 +5,9 @@ import isObject from 'lodash/lang/isPlainObject';
 
 
 // A `type` has the following properties:
+//   name         : string
 //   writable     : boolean
+//   instance     : boolean
 //   defaultValue : () => type
 //   default      : (type) => this
 //   valid        : (type) => boolean
@@ -34,6 +36,7 @@ const invalidBaseType = new TypeError('Invalid base type.');
 // All values are valid, but it has no default value.
 export const any = {
   writable: true,
+  instance: false,
 
   name: 'any',
 
@@ -164,8 +167,9 @@ export function instance(cls) {
 
   const type = Object.create(any);
 
+  type.instance = true;
   type.name = `instance<${cls.name}>`;
-  type.valid = val => val === null || val instanceof cls;
+  type.valid = val => val instanceof cls;
   type.defaultValue = () => null;
 
   return type;
