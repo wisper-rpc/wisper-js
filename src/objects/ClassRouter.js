@@ -38,7 +38,7 @@ function promisedConstruct(Constructor, args) {
 
 
 // Returns a Promise for type-checked arguments, or a rejected promise.
-function typeCheck(instances, func, args) {
+function resolveInstancesAndTypeCheck(instances, func, args) {
   const types = func.parameterTypes,
     n = types ? types.length : 0,
     newArgs = args.slice(0);
@@ -211,7 +211,7 @@ export default class ClassRouter {
         `'${this.name}' has no static method '${method}'.`));
     }
 
-    return typeCheck(this.instances, func, plainArgs)
+    return resolveInstancesAndTypeCheck(this.instances, func, plainArgs)
       .then( args => promisedApply(func, this.cls, args));
   }
 }
@@ -276,7 +276,7 @@ class LocalClassRouter extends ClassRouter {
 
   constructInstance(plainArgs) {
     // Safely, construct an instance from the given arguments.
-    return typeCheck(this.instances, this.cls, plainArgs)
+    return resolveInstancesAndTypeCheck(this.instances, this.cls, plainArgs)
       .then( args => promisedConstruct(this.cls, args))
       .then( instance => {
         this.bindInstance(instance[internal].id, instance);
@@ -305,7 +305,7 @@ class LocalClassRouter extends ClassRouter {
         `'${this.name}' instances have no method '${method}'.`));
     }
 
-    return typeCheck(this.instances, func, plainArgs)
+    return resolveInstancesAndTypeCheck(this.instances, func, plainArgs)
       .then( args => promisedApply(func, instance, args));
   }
 }
