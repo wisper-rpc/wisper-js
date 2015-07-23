@@ -17,6 +17,15 @@ function parse(path) {
 }
 
 
+// Returns `value[internal].id` if it exists, otherwise `value`.
+function internalIds(value) {
+  if (value && value[internal]) {
+    return value[internal].id;
+  }
+  return value;
+}
+
+
 // Like `Function.prototype.apply`,
 // returns a Promise, or null if `func` returned undefined.
 function promisedApply(func, ctx, args) {
@@ -326,10 +335,12 @@ class LocalClassRouter extends ClassRouter {
     return resolveInstancesAndTypeCheck(this.instances, this.cls, plainArgs)
       .then( args => promisedConstruct(this.cls, args))
       .then( instance => {
-        this.bindInstance(instance[internal].id, instance);
+        const { id, props } = instance[internal];
+
+        this.bindInstance(id, instance);
 
         // Once the instance is initialized, pass on it's representation.
-        return instance.ready.then(() => instance[internal]);
+        return instance.ready.then(() => ({ id, props: mapValues(props, internalIds) }));
       });
   }
 
