@@ -2,6 +2,7 @@
   "name": "wisper-js",
   "version": "0.1.0",
   "description": "A protocol for remote procedure calls, and object abstractions.",
+  "main": "wisper.js",
   "jsnext:main": "wisper.js",
   "scripts": {
     "test": "karma start karma.conf.js"
