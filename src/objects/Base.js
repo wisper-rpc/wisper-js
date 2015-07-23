@@ -23,4 +23,16 @@ export default class Base extends EventEmitter {
   }
 }
 
+
+// Give `Base` all methods of an `EventEmitter`,
+// in turn handing them down to all subclasses.
+const methods = Object.getOwnPropertyNames(EventEmitter.prototype)
+  .reduce((object, name) => {
+    object[name] = name;
+    return object;
+  }, Object.create(null));
+
+Object.defineProperties(Base, mapValues(methods, name =>
+  Object.getOwnPropertyDescriptor(EventEmitter.prototype, name)));
+
 Base.prototype[internal] = Object.create(Object.prototype);
