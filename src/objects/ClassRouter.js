@@ -153,16 +153,28 @@ export default class ClassRouter {
   }
 
 
-  // Dispatch an event on `instance` with the given `type` and `value`.
-  instanceEvent(instance, type, value) {
+  // Dispatch an event on `instance` with the given `key` and `value`.
+  instanceEvent(instance, key, value) {
     const props = instance[internal].props;
 
-    // If the instance has an internal property `type`, set its value.
-    if (type in props) {
-      props[type] = value;
+    // If the instance has an internal property `key`,
+    // check the type and set its value.
+    if (key in props) {
+      const types = this.cls.prototype[internal].props;
+      const type = types[key];
+
+      if (type.instance) {
+        value = this.instances[value];
+      }
+
+      // Don't set the property or dispatch the event
+      // if the value has the wrong type.
+      if (!type.valid(value)) { return; }
+
+      props[key] = value;
     }
 
-    instance.emit(type, value);
+    instance.emit(key, value);
   }
 
 
@@ -196,9 +208,9 @@ export default class ClassRouter {
   }
 
 
-  // Dispatch an event on `this.cls` with the given `type` and `value`.
-  staticEvent(type, value) {
-    this.cls.emit(type, value);
+  // Dispatch an event on `this.cls` with the given `key` and `value`.
+  staticEvent(key, value) {
+    this.cls.emit(key, value);
   }
 
 
