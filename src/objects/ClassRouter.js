@@ -1,4 +1,7 @@
+import assign from 'lodash/object/assign';
+import mapValues from 'lodash/object/mapValues';
 import { WisperError, domain, code } from '../errors';
+import Base from './Base';
 import Local from './Local';
 import internal from './internal';
 
@@ -248,6 +251,29 @@ class RemoteClassRouter extends ClassRouter {
         interfaceName: { value: this.name },
         bridge: { value: this.bridge }
       });
+    }
+
+    staticEvent(key, value) {
+      if (key === '~') {
+        // TODO: This won't work with true ES6 classes. What to do...?
+        const instance = Object.create(this.cls.prototype);
+
+        // Call `Base`.
+        Base.call(instance);
+
+        // Set the local properties to those received.
+        assign(instance[internal].props, value.props);
+
+        // Set the id, and track it.
+        instance.id = Promise.resolve(value.id);
+        instance.ready = Promise.resolve(instance);
+        instance[internal].id = value.id;
+        this.instances[value.id] = instance;
+
+        this.cls.emit(key, instance);
+      } else {
+        super.staticEvent();
+      }
     }
 }
 
