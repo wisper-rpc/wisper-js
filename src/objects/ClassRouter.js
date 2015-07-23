@@ -81,6 +81,9 @@ const missingInstanceId = Promise.reject(new WisperError(domain.RemoteObject,
 const destroyedInstance = Promise.reject(new WisperError(domain.RemoteObject,
   code.invalidInstance, 'The instance has been destroyed.'));
 
+const invalidEventParameters = Promise.reject(new WisperError(domain.RemoteObject,
+  code.invalidArguments, 'Wrong number of event parameters.'));
+
 
 export default class ClassRouter {
   constructor(bridge, name, cls) {
@@ -138,7 +141,10 @@ export default class ClassRouter {
       return this.destroyInstance(instance);
     }
 
-    if (target.event && msg.params.length > 2) {
+    if (target.event) {
+      if (msg.params.length !== 3) {
+        return invalidEventParameters;
+      }
       return this.instanceEvent(instance, msg.params[1], msg.params[2]);
     }
 
@@ -191,7 +197,10 @@ export default class ClassRouter {
       return this.constructInstance(msg.params);
     }
 
-    if (target.event && msg.params.length > 2) {
+    if (target.event) {
+      if (msg.params.length !== 2) {
+        return invalidEventParameters;
+      }
       return this.staticEvent(msg.params[0], msg.params[1]);
     }
 
