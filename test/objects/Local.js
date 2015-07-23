@@ -177,7 +177,7 @@ describe('List', function () {
     }
   }
 
-  it('can take List instances as parameters', function () {
+  it('can take List instances as parameters', function (done) {
     let firstId;
 
     const expects = [
@@ -197,6 +197,13 @@ describe('List', function () {
           val: 2,
           next: null
         });
+      },
+      msg => {
+        expect(msg).toEqual({
+          id: '8',
+          result: 3
+        });
+        done();
       }
     ];
     let counter = 0;
@@ -210,6 +217,15 @@ describe('List', function () {
 
     List.routerThrough(listBridge).addInstance(l1).addInstance(l2);
 
+    listBridge.receive({
+      method: 'List:!',
+      params: [ l1[internal].id, 'next', l2[internal].id ]
+    });
 
+    listBridge.receive({
+      id: '8',
+      method: 'List:sum',
+      params: [ l1[internal].id ]
+    });
   });
 });
