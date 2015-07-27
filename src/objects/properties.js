@@ -1,4 +1,5 @@
 import forOwn from 'lodash/object/forOwn';
+import assign from 'lodash/object/assign';
 import internal from './internal';
 
 
@@ -36,6 +37,17 @@ function propertyDescriptor(cls, key, type) {
 // over RPC whenever these properties are modified.
 export default function properties(definitions, maybeCls) {
   const decorator = cls => {
+    const inheritedInternal = cls.prototype[internal],
+      inheritedDefinitions = inheritedInternal && inheritedInternal.props;
+
+    if (inheritedDefinitions) {
+      Object.keys(definitions).forEach(name => {
+        if (inheritedDefinitions.hasOwnProperty(name)) {
+          throw new Error(`Can't redefine inherited property '${name}: ${inheritedDefinitions[name].name}'`);
+        }
+      });
+    }
+
     // Setup default values for properties on prototype.
     Object.defineProperty(cls.prototype, internal, {
       writable: true,
@@ -44,7 +56,8 @@ export default function properties(definitions, maybeCls) {
 
     Object.defineProperty(cls.prototype[internal], 'props', {
       enumerable: true,
-      value: definitions
+      // Extend property definitions with inherited definitions.
+      value: assign(definitions, inheritedDefinitions)
     });
 
     forOwn(definitions, (type, key) => {
