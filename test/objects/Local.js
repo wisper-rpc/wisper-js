@@ -27,14 +27,9 @@ bridge.notify = bridge.invoke = function (method, params) {
 // Test class for Locals.
 @interfaceName(bridge, 'wisp.test.Adder')
 @properties({
-  x: number
+  x: number.default(5)
 })
 class Adder extends Local {
-  constructor() {
-    super();
-    this.x = 5;
-  }
-
   @signature([ number ], number)
   add(y) {
     return this.x + y;
@@ -47,6 +42,9 @@ class Adder extends Local {
 }
 
 @interfaceName(bridge, 'wisp.test.Adder2')
+@properties({
+  y: number
+})
 class Adder2 extends Adder {}
 
 
@@ -95,6 +93,43 @@ describe('LocalObject', function () {
       });
       done();
     }, 40);
+  });
+
+  it('should work with inheritance', function () {
+    const a1 = new Adder2();
+    const a2 = new Adder2();
+
+    expect(a1 instanceof Local).toBeTruthy();
+    expect(a1 instanceof Adder).toBeTruthy();
+    expect(a1 instanceof Adder2).toBeTruthy();
+
+    expect('x' in a1).toBe(true);
+    expect('y' in a1).toBe(true);
+
+    expect(a1[internal].props).toEqual({
+      x: 5,
+      y: 0
+    });
+
+    a1.x = 2;
+    a2.y = 4;
+
+    expect(a2[internal].props).toEqual({
+      x: 5,
+      y: 4
+    });
+
+    expect(a1[internal].props).toEqual({
+      x: 2,
+      y: 0
+    });
+
+    a1.x = 'yo';
+
+    expect(a1[internal].props).toEqual({
+      x: 2,
+      y: 0
+    });
   });
 
   it("responds with an error if a method doesn't exist", function (done) {
