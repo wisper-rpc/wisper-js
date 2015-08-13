@@ -5,7 +5,11 @@
   "main": "wisper.js",
   "jsnext:main": "wisper.js",
   "scripts": {
-    "test": "karma start karma.conf.js"
+    "build": "npm run build-debug && npm run build-min",
+    "build-debug": "browserify wisper.js -d --s wisper > dist/wisper.js",
+    "build-min": "browserify wisper.js --s wisper | uglifyjs -c > dist/wisper.min.js",
+    "test": "karma start karma.conf.js",
+    "watch": "watchify wisper.js -d --s wisper -o dist/wisper.js"
   },
   "browserify": {
     "transform": [
@@ -18,6 +22,7 @@
   "devDependencies": {
     "babel-eslint": "^3.1.23",
     "babelify": "^6.1.2",
+    "browserify": "^11.0.1",
     "browserify-istanbul": "^0.2.1",
     "eslint": "^0.24.1",
     "jasmine-core": "^2.3.4",
@@ -26,7 +31,9 @@
     "karma-browserify": "^4.2.1",
     "karma-chrome-launcher": "^0.2.0",
     "karma-coverage": "^0.4.2",
-    "karma-jasmine": "^0.3.6"
+    "karma-jasmine": "^0.3.6",
+    "uglify-js": "^2.4.24",
+    "watchify": "^3.3.1"
   },
   "dependencies": {
     "events": "^1.0.2",
