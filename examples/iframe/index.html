@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Iframe Example</title>
+		<script src="../../dist/wisper.js" charset="utf-8"></script>
+	</head>
+	<body>
+		<h4>Make sure you've run <code>npm run build-debug</code> before testing this.</h4>
+		<iframe src="child.html" width="" height=""></iframe>
+		<div class="">
+			<button type="button" name="button">Change Background Color</button>
+		</div>
+
+		<!-- space -->
+		<p></p>
+
+		<div>
+			<label for="number">What's the color at index?</label>
+			<input type="number" name="name" value="">
+			<span></span>
+		</div>
+
+		<script type="text/javascript">
+			var frame = document.querySelector('iframe'),
+				button = document.querySelector('button'),
+				input = document.querySelector('input'),
+				span = document.querySelector('span');
+
+			var child = new wisper.IframeBridge(frame.contentWindow);
+
+			button.addEventListener('click', function () {
+				child.invoke('background.nextColor')
+				.then(function (color) {
+					console.log('The color was changed to', color, '!');
+				})
+				.catch(function (error) {
+					console.error(error.name, ':', error.message)
+				});
+			});
+
+			input.addEventListener('change', function () {
+				var num = parseInt(this.value)
+
+
+				child.invoke('background.colorAtIndex', [ num ])
+				.then(function (color) {
+					span.innerText = color;
+				});
+			});
+		</script>
+	</body>
+</html>

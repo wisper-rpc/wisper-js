@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Child</title>
+		<script src="../../dist/wisper.js" charset="utf-8"></script>
+	</head>
+	<body>
+		<script type="text/javascript">
+		function setBackgroundColor(color) {
+			document.body.style.backgroundColor = color;
+		}
+
+		// This function wraps a function with a RouteFunction.
+		// It collects the parameters from the received message,
+		// and turns the return value into a Promise.
+		//
+		// TODO: A function like this should be included in the wisper libary.
+		function wrap(fn) {
+			return function (path, message) {
+				console.log(path, message);
+
+				return Promise.resolve(fn.apply(null, message.params));
+			}
+		}
+
+
+		// Start using wisper.
+		var parent = new wisper.IframeBridge(window.parent);
+
+		var index = 0;
+		var colors = ['white', 'red', 'green', 'blue', 'yellow', 'black'];
+
+		// This is a RouteFunction.
+		// It deals with a path and a complete wisper message.
+		// It must return a promise for some JSON stringifiable return value,
+		// or a rejected promise with a wisper.Error.
+		function nextColor() {
+			var color = colors[index = (index + 1) % colors.length];
+
+			setBackgroundColor(color);
+
+			return color;
+		}
+
+
+		parent.expose('background.nextColor', wrap(nextColor));
+
+
+		// Returns the color at the given index.
+		function colorAtIndex(index) {
+			return colors[ index % colors.length ];
+		}
+
+		parent.expose('background.colorAtIndex', wrap(colorAtIndex));
+		</script>
+	</body>
+</html>
