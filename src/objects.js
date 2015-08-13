@@ -1,6 +1,6 @@
-import interfaceName from './objects/InterfaceName';
+import interfaceName from './objects/interfaceName';
 import Local from './objects/Local';
-import properties from './objects/Properties';
+import properties from './objects/properties';
 import Remote from './objects/Remote';
 
 
