@@ -5,13 +5,13 @@ var cover = require('browserify-istanbul');
 var coverOptions = {
   ignore: ['test/*', 'dist/*'],
   defaultIgnore: true
-}
+};
 
 function normalizeBrowserName(browser) {
-    return browser.toLowerCase().split(/[ /-]/)[0];
+  return browser.toLowerCase().split(/[ /-]/)[0];
 }
 
-module.exports = function(karma) {
+module.exports = function (karma) {
   karma.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -28,6 +28,7 @@ module.exports = function(karma) {
 
     // list of files to exclude
     exclude: [
+      'test/class/*.js'
     ],
 
     // preprocess matching files before serving them to the browser
@@ -45,10 +46,10 @@ module.exports = function(karma) {
                 ]
             }]
         ],
-        configure: function(bundle) {
-            bundle.on('prebundle', function() {
-                bundle.transform(cover(coverOptions));
-            });
+        configure: function (bundle) {
+          bundle.on('prebundle', function () {
+            bundle.transform(cover(coverOptions));
+          });
         }
 
     },
@@ -67,14 +68,14 @@ module.exports = function(karma) {
     coverageReporter: {
       reporters: [
         {
-          type : 'html',
+          type: 'html',
           subdir: normalizeBrowserName,
-          dir : 'reports/coverage/'
+          dir: 'reports/coverage/'
         },
         {
-          type : 'cobertura',
+          type: 'cobertura',
           subdir: normalizeBrowserName,
-          dir : 'reports/coverage/'
+          dir: 'reports/coverage/'
         }
       ]
     },

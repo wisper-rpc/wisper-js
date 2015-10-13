@@ -231,6 +231,7 @@ export default class ClassRouter {
 
   // Dispatch an event on `this.cls` with the given `key` and `value`.
   staticEvent(key, value) {
+    // Can't know the type of the value of a plain event.
     this.cls.emit(key, value);
   }
 
@@ -263,6 +264,9 @@ class RemoteClassRouter extends ClassRouter {
     }
 
     staticEvent(key, value) {
+      // Special construction event.
+      // Type of `value` is known to be `this.cls` and
+      // should be resolved to a brand new instance.
       if (key === '~') {
         // TODO: This won't work with true ES6 classes. What to do...?
         const instance = Object.create(this.cls.prototype);

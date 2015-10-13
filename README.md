@@ -2,6 +2,7 @@
 The JavaScript implementation of a simple, JSON-based RPC protocol.
 
 1. [Getting Started](#getting-started)
+1. [The Bridge API](#the-bridge-api)
 
 ## Getting Started
 
@@ -74,3 +75,13 @@ class XHRBridge extends BaseBridge {
 }
 
 ```
+
+## The Bridge API
+The Bridge API consists of three primary methods: [expose](#-expose-path-string-router-router-boolean-), [notify](#-notify-path-string-args-array-) and [invoke](#-invoke-path-string-args-array-promise-).
+
+#### `expose(path: string, router: Router): boolean`
+Expose a *route*
+
+#### `notify(path: string, args?: Array)`
+
+#### `invoke(path: string, args?: Array): Promise`

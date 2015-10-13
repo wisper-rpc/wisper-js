@@ -3,6 +3,13 @@ import every from 'lodash/collection/every';
 import clone from 'lodash/lang/cloneDeep';
 import isObject from 'lodash/lang/isPlainObject';
 
+// import {
+//   mapValues,
+//   every,
+//   cloneDeep as clone,
+//   isPlainObject as isObject
+// } from 'future-lodash';
+
 
 // A `type` has the following properties:
 //   name         : string

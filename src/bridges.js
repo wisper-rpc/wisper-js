@@ -34,10 +34,13 @@ export class BaseBridge {
   invoke(method, params=[]) {
     const id = this.nextId();
 
-    this.send({ method, params, id });
-
     return new Promise((resolve, reject) => {
+      // In the unlikely event that we get a synchronous response,
+      // we'll have to be ready to receive it, or we'll error.
       this.waiting[id] = { resolve, reject };
+
+      // Send the message once we're waiting for the response.
+      this.send({ method, params, id });
     });
   }
 
