@@ -26,11 +26,17 @@ export default class Remote extends Base {
   constructor(args=[]) {
     super();
     this.id = this.bridge.invoke(this.interfaceName + '~', args).then(result => {
-      const id = this[internal].id = result.id;
+      let id;
+
+      if (typeof result === 'object') {
+        id = this[internal].id = result.id;
+        assign(this[internal].props, result.props);
+      } else {
+        id = result;
+      }
 
       // Set the local properties to those received.
-      assign(this[internal].props, result.props);
-      this.constructor.instances[result.id] = this;
+      this.constructor.instances[id] = this;
       return id;
     });
 
