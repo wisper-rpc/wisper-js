@@ -60,7 +60,7 @@ export class BaseBridge {
     try {
       this.receive(JSON.parse(json));
     } catch (e) {
-      this.send(WisperError.cast(e));
+      this.send({ error: WisperError.cast(e) });
     }
   }
 
@@ -101,8 +101,11 @@ export class BaseBridge {
         waiting.reject(WisperError.cast(msg.error));
       }
     } else {
-      this.sendError(msg.id, new WisperError(domain.Protocol, code.oddResponse,
-        `Got unexpected response for id: '${msg.id}', but no request was made.`));
+      this.send({
+        id: msg.id,
+        error: new WisperError(domain.Protocol, code.oddResponse,
+        `Got unexpected response for id: '${msg.id}', but no request was made.`)
+      });
     }
   }
 
