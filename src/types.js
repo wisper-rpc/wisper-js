@@ -2,6 +2,7 @@ import mapValues from 'lodash/object/mapValues';
 import every from 'lodash/collection/every';
 import clone from 'lodash/lang/cloneDeep';
 import isObject from 'lodash/lang/isPlainObject';
+import identity from 'lodash/utility/identity';
 
 // import {
 //   mapValues,
@@ -62,7 +63,11 @@ export const any = {
     type.defaultValue = () => clone(val);
 
     return type;
-  }
+  },
+
+  marshal: identity,
+
+  unmarshal: identity
 };
 
 
@@ -178,6 +183,9 @@ export function instance(cls) {
   type.name = `instance<${cls.name}>`;
   type.valid = val => val instanceof cls;
   type.defaultValue = () => null;
+
+  type.marshal = obj => obj.id;
+  type.unmarshal = id => cls.instances[id];
 
   return type;
 }
