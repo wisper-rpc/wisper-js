@@ -176,12 +176,9 @@ export default class ClassRouter {
     // If the instance has an internal property `key`,
     // check the type and set its value.
     if (key in props) {
-      const types = this.cls.prototype[internal].props;
-      const type = types[key];
+      const type = this.cls.prototype[internal].props[key];
 
-      if (type.instance) {
-        value = this.instances[value];
-      }
+      value = type.unmarshal(value);
 
       // Don't set the property or dispatch the event
       // if the value has the wrong type.
