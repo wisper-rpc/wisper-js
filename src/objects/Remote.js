@@ -28,10 +28,13 @@ export default class Remote extends Base {
     this.id = this.bridge.invoke(this.interfaceName + '~', args).then(result => {
       let id;
 
+      // Usually, the result of a construction event
+      // should be an { id, props } object.
       if (typeof result === 'object') {
         id = this[internal].id = result.id;
         assign(this[internal].props, result.props);
       } else {
+        // To support older implementations, result can also be just an id.
         id = result;
       }
 
