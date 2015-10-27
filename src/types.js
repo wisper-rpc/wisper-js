@@ -2,6 +2,14 @@ import mapValues from 'lodash/object/mapValues';
 import every from 'lodash/collection/every';
 import clone from 'lodash/lang/cloneDeep';
 import isObject from 'lodash/lang/isPlainObject';
+import identity from 'lodash/utility/identity';
+
+// import {
+//   mapValues,
+//   every,
+//   cloneDeep as clone,
+//   isPlainObject as isObject
+// } from 'future-lodash';
 
 
 // A `type` has the following properties:
@@ -55,7 +63,11 @@ export const any = {
     type.defaultValue = () => clone(val);
 
     return type;
-  }
+  },
+
+  marshal: identity,
+
+  unmarshal: identity
 };
 
 
@@ -117,6 +129,9 @@ export function array(baseType) {
   type.valid = val => Array.isArray(val) && val.every(baseType.valid);
   type.defaultValue = () => [];
 
+  type.marshal = arr => arr.map( baseType.marshal );
+  type.unmarshal = arr => arr.map( baseType.unmarshal );
+
   return type;
 }
 
@@ -139,6 +154,9 @@ export function object(properties) {
 
   type.defaultValue = () => mapValues(properties, baseType => baseType.defaultValue());
 
+  type.marshal = val => mapValues(properties, (baseType, key) => baseType.marshal( val[key] ));
+  type.unmarshal = val => mapValues(properties, (baseType, key) => baseType.unmarshal( val[key] ));
+
   return type;
 }
 
@@ -154,6 +172,9 @@ export function nullable(baseType) {
   type.name = `nullable<${baseType.name}>`;
   type.valid = val => val === null || baseType.valid(val);
   type.defaultValue = () => null;
+
+  type.marshal = val => val === null ? val : baseType.marshal(val);
+  type.unmarshal = val => val === null ? val : baseType.unmarshal(val);
 
   return type;
 }
@@ -171,6 +192,9 @@ export function instance(cls) {
   type.name = `instance<${cls.name}>`;
   type.valid = val => val instanceof cls;
   type.defaultValue = () => null;
+
+  type.marshal = obj => obj.id;
+  type.unmarshal = id => cls.instances[id];
 
   return type;
 }

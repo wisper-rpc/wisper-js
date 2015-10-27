@@ -200,7 +200,7 @@ describe('List', function () {
 
     @signature([nullable(instance(List))])
     setNext(next) {
-      return next;
+      this[internal].props.next = next;
     }
 
     sum() {
@@ -253,8 +253,8 @@ describe('List', function () {
     List.routerThrough(listBridge).addInstance(l1).addInstance(l2);
 
     listBridge.receive({
-      method: 'List:!',
-      params: [ l1[internal].id, 'next', l2[internal].id ]
+      method: 'List:setNext',
+      params: [ l1[internal].id, l2[internal].id ]
     });
 
     listBridge.receive({

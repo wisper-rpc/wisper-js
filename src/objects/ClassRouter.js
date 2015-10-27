@@ -50,34 +50,32 @@ function promisedConstruct(Constructor, args) {
 
 
 // Returns a Promise for type-checked arguments, or a rejected promise.
-function resolveInstancesAndTypeCheck(instances, func, args) {
+function unmarshalAndTypeCheckArguments(func, args) {
   const types = func.parameterTypes,
     n = types ? types.length : 0,
     newArgs = args.slice(0);
 
   for (let i = 0; i < n; i += 1) {
-    // Resolve references to instances.
-    if (types[i].instance) {
-      const instance = instances[args[i]];
+    const type = types[i];
+    const arg = args[i];
 
-      if (types[i].valid(instance)) {
-        newArgs[i] = instance;
-        continue;
+    // Unmarshal arguments to values corresponding to their respective types
+    try {
+      newArgs[i] = type.unmarshal(arg);
+
+      // ... and type-check.
+      if (!type.valid(newArgs[i])) {
+        return Promise.reject(new WisperError(
+          domain.RemoteObject,
+          code.invalidArguments,
+          `Expected argument #${i + 1} to be of type '${type.name}', got: ${JSON.stringify(args[i])}.`
+        ));
       }
-
+    } catch (e) {
       return Promise.reject(new WisperError(
         domain.RemoteObject,
         code.invalidInstance,
         `No instance with id '${args[i]}'.`
-      ));
-    }
-
-    // Type-check other arguments.
-    if (!types[i].valid(newArgs[i])) {
-      return Promise.reject(new WisperError(
-        domain.RemoteObject,
-        code.invalidArguments,
-        `Expected argument #${i + 1} to be of type '${types[i].name}', got: ${JSON.stringify(args[i])}.`
       ));
     }
   }
@@ -178,12 +176,9 @@ export default class ClassRouter {
     // If the instance has an internal property `key`,
     // check the type and set its value.
     if (key in props) {
-      const types = this.cls.prototype[internal].props;
-      const type = types[key];
+      const type = this.cls.prototype[internal].props[key];
 
-      if (type.instance) {
-        value = this.instances[value];
-      }
+      value = type.unmarshal(value);
 
       // Don't set the property or dispatch the event
       // if the value has the wrong type.
@@ -231,6 +226,7 @@ export default class ClassRouter {
 
   // Dispatch an event on `this.cls` with the given `key` and `value`.
   staticEvent(key, value) {
+    // Can't know the type of the value of a plain event.
     this.cls.emit(key, value);
   }
 
@@ -244,8 +240,9 @@ export default class ClassRouter {
         `'${this.name}' has no static method '${method}'.`));
     }
 
-    return resolveInstancesAndTypeCheck(this.instances, func, plainArgs)
-      .then( args => promisedApply(func, this.cls, args));
+    return unmarshalAndTypeCheckArguments(func, plainArgs)
+      .then( args => promisedApply(func, this.cls, args))
+      .then( func.returnType.marshal );
   }
 }
 
@@ -263,6 +260,9 @@ class RemoteClassRouter extends ClassRouter {
     }
 
     staticEvent(key, value) {
+      // Special construction event.
+      // Type of `value` is known to be `this.cls` and
+      // should be resolved to a brand new instance.
       if (key === '~') {
         // TODO: This won't work with true ES6 classes. What to do...?
         const instance = Object.create(this.cls.prototype);
@@ -292,6 +292,9 @@ class RemoteClassRouter extends ClassRouter {
 class LocalClassRouter extends ClassRouter {
   constructor() {
     super(...arguments);
+
+    // TODO: this won't work for multiple bridges
+    this.cls.instances = this.instances;
 
     if (!this.cls.hasOwnProperty('routers')) {
       this.cls.routers = Object.create(null);
@@ -332,7 +335,7 @@ class LocalClassRouter extends ClassRouter {
 
   constructInstance(plainArgs) {
     // Safely, construct an instance from the given arguments.
-    return resolveInstancesAndTypeCheck(this.instances, this.cls, plainArgs)
+    return unmarshalAndTypeCheckArguments(this.cls, plainArgs)
       .then( args => promisedConstruct(this.cls, args))
       .then( instance => {
         const { id, props } = instance[internal];
@@ -363,7 +366,7 @@ class LocalClassRouter extends ClassRouter {
         `'${this.name}' instances have no method '${method}'.`));
     }
 
-    return resolveInstancesAndTypeCheck(this.instances, func, plainArgs)
+    return unmarshalAndTypeCheckArguments(func, plainArgs)
       .then( args => promisedApply(func, instance, args));
   }
 }

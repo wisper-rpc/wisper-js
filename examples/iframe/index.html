@@ -40,8 +40,7 @@
 			});
 
 			input.addEventListener('change', function () {
-				var num = parseInt(this.value)
-
+				var num = parseInt(this.value);
 
 				child.invoke('background.colorAtIndex', [ num ])
 				.then(function (color) {

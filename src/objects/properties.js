@@ -21,7 +21,7 @@ function propertyDescriptor(cls, key, type) {
 
         // If a bridge exists, notify of the change.
         if (this.bridge) {
-          this.dispatch(key, value);
+          this.dispatch(key, type.marshal(value));
         }
       }
     };
