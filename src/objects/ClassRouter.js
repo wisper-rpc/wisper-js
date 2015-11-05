@@ -281,7 +281,7 @@ class RemoteClassRouter extends ClassRouter {
 
         this.cls.emit(key, instance);
       } else {
-        super.staticEvent();
+        super.staticEvent(key, value);
       }
     }
 }
