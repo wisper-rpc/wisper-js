@@ -5,12 +5,16 @@ import Base from './Base';
 import Local from './Local';
 import internal from './internal';
 
+// Returns true if `string` ends with `tail`.
+function endsWith(string, tail) {
+  return string.slice(-tail.length) === tail;
+}
 
 // TODO: return null if invalid modifiers
 function parse(path) {
   const instance = path[0] === ':',
-    event = path.endsWith('!'),
-    tilde = path.endsWith('~'),
+    event = endsWith(path, '!'),
+    tilde = endsWith(path, '~'),
     method = (event || tilde) ? null : path.slice(instance);
 
   return { method, event, instance, tilde };
