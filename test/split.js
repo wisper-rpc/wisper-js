@@ -20,7 +20,10 @@ it('split', function () {
   expect(split('A~')).toEqual(['A', '~']);
   expect(split('A:~')).toEqual(['A', ':~']);
 
+  expect(split('!')).toEqual(['!']);
+
   // TODO: Expand to handle special cases.
   expect(split('Aag_ag/asd4.a3')).toEqual(['Aag_ag', '/asd4.a3']);
-  expect(split('/asd4.a3')).toEqual(['', '/asd4.a3']);
+  expect(split('/asd4.a3')).toEqual(['/asd4.a3']);
+  expect(split('.')).toEqual(['', '']);
 });
