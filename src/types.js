@@ -19,6 +19,8 @@ import identity from 'lodash/utility/identity';
 //   defaultValue : () => type
 //   default      : (type) => this
 //   valid        : (type) => boolean
+//   marshal      : (type) => ?
+//   unmarshal    : (?) => type
 //
 // The `default` method is used to create a new type with
 // the given value as the default. The given value must be
@@ -33,10 +35,6 @@ import identity from 'lodash/utility/identity';
 // let two = number.default('2'); // throws TypeError
 // ```
 
-
-// The `TypeError` to throw when a default value is not a valid type.
-const invalidDefault = new TypeError('Invalid default value for type.');
-const invalidProperties = new TypeError('Invalid object structure for properties argument.');
 const invalidBaseType = new TypeError('Invalid base type.');
 
 
@@ -55,7 +53,7 @@ export const any = {
   // Creates a new type, with `val` as the type's the default value.
   default(val) {
     if (!this.valid(val)) {
-      throw invalidDefault;
+      throw new TypeError(`Invalid default value for '${this.name}'!`);
     }
 
     const type = Object.create(this);
@@ -129,7 +127,7 @@ export function array(baseType) {
   type.valid = val => Array.isArray(val) && val.every(baseType.valid);
   type.defaultValue = () => [];
 
-  type.marshal = arr => arr.map( baseType.marshal );
+  type.marshal = arr => Promise.all( arr.map( baseType.marshal ) );
   type.unmarshal = arr => arr.map( baseType.unmarshal );
 
   return type;
@@ -140,7 +138,7 @@ export function array(baseType) {
 // The given value must be an object with only properties.
 export function object(properties) {
   if (!isObject(properties) || !every(properties, isType)) {
-    throw invalidProperties;
+    throw new TypeError('Not all object properties were types.');
   }
 
   const type = Object.create(any);

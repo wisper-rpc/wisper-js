@@ -87,6 +87,44 @@ describe('type', function () {
   });
 
 
+  it('can marshal and unmarshal types', function () {
+    // since any type can marshal into promises, any compositioning type must return a promise
+    expect(array(number).marshal([])).toEqual(jasmine.any(Promise));
+
+    const color = Object.create(object({
+      r: number,
+      g: number,
+      b: number,
+      a: number
+    }));
+
+    color.name = 'color';
+
+    color.unmarshal = str => {
+      if (typeof str === 'string') {
+        if (str.length < 7) return str;
+
+        return {
+          r: parseInt(str.slice(1,3), 16)/255,
+          g: parseInt(str.slice(3,5), 16)/255,
+          b: parseInt(str.slice(5,7), 16)/255,
+          a: parseInt(str.slice(7) || 'ff', 16)/255
+        }
+      }
+
+      return str;
+    };
+
+    expect(color.unmarshal('#ff0000')).toEqual({
+      r: 1,
+      g: 0,
+      b: 0,
+      a: 1
+    });
+
+    expect(color.valid(color.unmarshal('#00ff00'))).toBeTruthy();
+  });
+
   describe('can create composite types:', function () {
 
     const person = object({
@@ -104,7 +142,7 @@ describe('type', function () {
       } catch (e) {
         return e instanceof TypeError &&
             (e.message === 'Invalid base type.' ||
-             e.message === 'Invalid object structure for properties argument.');
+             e.message === 'Not all object properties were types.');
       }
       return false;
     }
@@ -161,17 +199,17 @@ describe('type', function () {
 
     it('"object" function should throw TypeError for invalid property structure as parameter', function () {
       expect([
-          null, undefined, function () {},
-          string, number, boolean, array(string), nullable(number), readonly(boolean),
-          {
-            name: string,
-            age: boolean,
-            fullname: object({
-              first: string,
-              last: string
-            }),
-            doSomething: function () {}
-          }
+        null, undefined, function () {},
+        string, number, boolean, array(string), nullable(number), readonly(boolean),
+        {
+          name: string,
+          age: boolean,
+          fullname: object({
+            first: string,
+            last: string
+          }),
+          doSomething: function () {}
+        }
       ].every(x => isFunctionThrowException(object, x))).toBeTruthy();
     });
 
