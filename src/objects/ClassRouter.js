@@ -88,17 +88,6 @@ function unmarshalAndTypeCheckArguments(func, args) {
 }
 
 
-// Error constants.
-const missingInstanceId = Promise.reject(new WisperError(domain.RemoteObject,
-  code.invalidArguments, 'Missing instance id.'));
-
-const destroyedInstance = Promise.reject(new WisperError(domain.RemoteObject,
-  code.invalidInstance, 'The instance has been destroyed.'));
-
-const invalidEventParameters = Promise.reject(new WisperError(domain.RemoteObject,
-  code.invalidArguments, 'Wrong number of event parameters.'));
-
-
 export default class ClassRouter {
   constructor(bridge, name, cls) {
     if (!bridge.meta.instances) {
@@ -140,7 +129,8 @@ export default class ClassRouter {
 
   instanceRoute(target, msg) {
     if (!msg.params.length) {
-      return missingInstanceId;
+      return Promise.reject(new WisperError(domain.RemoteObject,
+        code.invalidArguments, 'Missing instance id.'));
     }
 
     const id = msg.params[0],
@@ -157,7 +147,8 @@ export default class ClassRouter {
 
     if (target.event) {
       if (msg.params.length !== 3) {
-        return invalidEventParameters;
+        return Promise.reject(new WisperError(domain.RemoteObject,
+          code.invalidArguments, `Instance events requires 3 parameters, got: ${msg.params.length}`));;
       }
       return this.instanceEvent(instance, msg.params[1], msg.params[2]);
     }
@@ -210,7 +201,8 @@ export default class ClassRouter {
 
     if (target.event) {
       if (msg.params.length !== 2) {
-        return invalidEventParameters;
+        return Promise.reject(new WisperError(domain.RemoteObject,
+          code.invalidArguments, `Static events requires 2 parameters, got: ${msg.params.length}`));
       }
       return this.staticEvent(msg.params[0], msg.params[1]);
     }
@@ -355,7 +347,8 @@ class LocalClassRouter extends ClassRouter {
   destroyInstance(instance) {
     delete this.instances[instance[internal].id];
     instance[internal].id = null;
-    instance.id = destroyedInstance;
+    instance.id = Promise.reject(new WisperError(domain.RemoteObject,
+      code.invalidInstance, 'The instance has been destroyed.'));
 
     instance.emit('destroy');
   }
