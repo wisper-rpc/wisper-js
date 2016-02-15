@@ -1,29 +1,30 @@
-import split from '../src/split';
+import assert from 'assert';
+import split from '../src/split.js';
 
 it('split', function () {
   // Splits off the first identifier-like string, eating any dots.
-  expect(split('a.b.c')).toEqual(['a', 'b.c']);
+  assert.deepEqual( split('a.b.c'), ['a', 'b.c'] );
 
   // No remaining identifiers.
-  expect(split('c')).toEqual(['c', '']);
+  assert.deepEqual( split('c'), ['c', ''] );
 
   // Empty namespace.
-  expect(split('.handshake')).toEqual(['', 'handshake']);
+  assert.deepEqual( split('.handshake'), ['', 'handshake'] );
 
   // Method modifiers.
-  expect(split('A.a')).toEqual(['A', 'a']);
-  expect(split('A:a')).toEqual(['A', ':a']);
+  assert.deepEqual( split('A.a'), ['A', 'a'] );
+  assert.deepEqual( split('A:a'), ['A', ':a'] );
 
-  expect(split('A!')).toEqual(['A', '!']);
-  expect(split('A:!')).toEqual(['A', ':!']);
+  assert.deepEqual( split('A!'), ['A', '!'] );
+  assert.deepEqual( split('A:!'), ['A', ':!'] );
 
-  expect(split('A~')).toEqual(['A', '~']);
-  expect(split('A:~')).toEqual(['A', ':~']);
+  assert.deepEqual( split('A~'), ['A', '~'] );
+  assert.deepEqual( split('A:~'), ['A', ':~'] );
 
-  expect(split('!')).toEqual(['!']);
+  assert.deepEqual( split('!'), ['!'] );
 
   // TODO: Expand to handle special cases.
-  expect(split('Aag_ag/asd4.a3')).toEqual(['Aag_ag', '/asd4.a3']);
-  expect(split('/asd4.a3')).toEqual(['/asd4.a3']);
-  expect(split('.')).toEqual(['', '']);
+  assert.deepEqual( split('Aag_ag/asd4.a3'), ['Aag_ag', '/asd4.a3'] );
+  assert.deepEqual( split('/asd4.a3'), ['/asd4.a3'] );
+  assert.deepEqual( split('.'), ['', ''] );
 });
