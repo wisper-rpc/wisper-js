@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import ClassRouter from './ClassRouter';
+import ClassRouter from './ClassRouter.js';
 
 
 // Decorator for `Remote` and `Local` classes.

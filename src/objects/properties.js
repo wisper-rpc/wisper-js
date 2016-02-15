@@ -1,6 +1,6 @@
-import forOwn from 'lodash/object/forOwn';
-import assign from 'lodash/object/assign';
-import internal from './internal';
+import forOwn from 'lodash-es/forOwn';
+import assign from 'lodash-es/assign';
+import internal from './internal.js';
 
 
 // Creates a property descriptor from a type and key.

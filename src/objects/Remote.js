@@ -1,6 +1,6 @@
-import assign from 'lodash/object/assign';
-import Base from './Base';
-import internal from './internal';
+import assign from 'lodash-es/assign';
+import Base from './Base.js';
+import internal from './internal.js';
 
 /**
  * Base-class for Remotes.

@@ -1,8 +1,8 @@
-import set from 'lodash/object/set';
-import Namespace from './Namespace';
-import { WisperError, domain, code } from './errors';
-import { isResponse, isMessage, isPlainError, isResult } from './protocol';
-import stringId from './stringId';
+import set from 'lodash-es/set';
+import Namespace from './Namespace.js';
+import { WisperError, domain, code } from './errors.js';
+import { isResponse, isMessage, isPlainError, isResult } from './protocol.js';
+import stringId from './stringId.js';
 
 function noop() {}
 

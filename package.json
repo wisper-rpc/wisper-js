@@ -37,6 +37,6 @@
   },
   "dependencies": {
     "events": "^1.0.2",
-    "lodash": "^3.10.0"
+    "lodash-es": "^4.3.0"
   }
 }

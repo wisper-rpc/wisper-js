@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
-import internal from './internal';
-import mapValues from 'lodash/object/mapValues';
+import mapValues from 'lodash-es/mapValues';
+import internal from './internal.js';
 
 
 export default class Base extends EventEmitter {

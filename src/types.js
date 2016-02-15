@@ -1,15 +1,8 @@
-import mapValues from 'lodash/object/mapValues';
-import every from 'lodash/collection/every';
-import clone from 'lodash/lang/cloneDeep';
-import isObject from 'lodash/lang/isPlainObject';
-import identity from 'lodash/utility/identity';
-
-// import {
-//   mapValues,
-//   every,
-//   cloneDeep as clone,
-//   isPlainObject as isObject
-// } from 'future-lodash';
+import mapValues from 'lodash-es/mapValues';
+import every from 'lodash-es/every';
+import clone from 'lodash-es/cloneDeep';
+import isObject from 'lodash-es/isPlainObject';
+import identity from 'lodash-es/identity';
 
 
 // A `type` has the following properties:
