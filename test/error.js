@@ -1,24 +1,23 @@
-import { WisperError, domain, code } from '../src/errors';
+import assert from 'assert';
+import { WisperError, domain, code } from '../src/errors.js';
 
 describe('WisperError', function () {
   const typeError = new WisperError(domain.JavaScript, code.type, 'Expected number.');
 
 
   it('is an ES6 class', function () {
-    expect(WisperError).toThrow();
+    assert.throws( WisperError );
   });
 
 
   it('gets it\'s name from the domain and code', function () {
-    expect(new WisperError(domain.Protocol, code.oddResponse, 'message').name)
-      .toEqual('OddResponseError');
-    expect(new WisperError(domain.RemoteObject, code.invalidModifier, 'message').name)
-      .toEqual('InvalidModifierError');
+    assert.equal(new WisperError(domain.Protocol, code.oddResponse, 'message').name, 'OddResponseError');
+    assert.equal(new WisperError(domain.RemoteObject, code.invalidModifier, 'message').name, 'InvalidModifierError');
   });
 
 
   it('JSON.stringify', function () {
-    expect(JSON.parse(JSON.stringify(typeError))).toEqual({
+    assert.deepEqual( JSON.parse( JSON.stringify( typeError ) ), {
       domain: domain.JavaScript,
       code: code.type,
       name: 'TypeError',
@@ -29,10 +28,10 @@ describe('WisperError', function () {
 
   it('#cast', function () {
     // Native Errors are cast to WisperErrors.
-    expect(WisperError.cast(new TypeError('Expected number.'))).toEqual(typeError);
+    assert.deepEqual( WisperError.cast(new TypeError('Expected number.')), typeError );
 
     // WisperErrors are returned as is.
-    expect(WisperError.cast(typeError)).toEqual(typeError);
+    assert.deepEqual( WisperError.cast(typeError), typeError );
 
     // Error-like objects are also cast.
     const we = WisperError.cast({
@@ -49,12 +48,12 @@ describe('WisperError', function () {
       }
     });
 
-    expect(we.domain).toBe(domain.RemoteObject);
-    expect(we.name).toBe('InvalidArgumentsError');
+    assert.equal( we.domain, domain.RemoteObject );
+    assert.equal( we.name, 'InvalidArgumentsError' );
 
-    expect(we.underlying.domain).toBe(domain.iOSX);
-    expect(we.underlying.code).toBe(0x5326);
-    expect(we.underlying.name).toBe('Some-iOSX-Error');
-    expect(we.underlying.underlying).toBe(undefined);
+    assert.equal( we.underlying.domain, domain.iOSX );
+    assert.equal( we.underlying.code, 0x5326 );
+    assert.equal( we.underlying.name, 'Some-iOSX-Error' );
+    assert.equal( we.underlying.underlying, undefined );
   });
 });
