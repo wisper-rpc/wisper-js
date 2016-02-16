@@ -1,3 +1,4 @@
+import './bridges.js';
 import './error.js';
 import './Namespace.js';
 import './protocol.js';

@@ -1,90 +1,95 @@
-import { BaseBridge, GlobalBridge, IframeBridge } from '../src/bridges';
+import assert from 'assert';
+import { BaseBridge, PropertyBridge, IframeBridge } from '../src/bridges.js';
 
-describe('BaseBridge', function () {
+describe( 'BaseBridge', function () {
   const bridge = new BaseBridge();
 
-  it('sends messages', function () {
+  it( 'sends messages', function () {
     bridge.send = data => {
-      expect(data).toEqual({
+      assert.deepEqual( data, {
         method: 'some',
-        params: [false]
+        params: [ false ]
       });
     };
 
-    bridge.notify('some', [false]);
+    bridge.notify( 'some', [ false ] );
   });
 });
 
 
-describe('GlobalBridge', function () {
+describe( 'PropertyBridge', function () {
   let bridge, lastJSON;
+  const target = {};
 
-  it('defines a receive function accessible at the global scope', function () {
-    bridge = new GlobalBridge('globalReceive', (json) => {
+  it( 'defines a receive function accessible at the global scope', function () {
+    bridge = new PropertyBridge( target, 'globalReceive', ( json ) => {
       lastJSON = json;
     });
 
-    expect(bridge.receiveProperty).toEqual('globalReceive');
-    expect(typeof window.globalReceive).toEqual('function');
+    assert.equal( bridge.receiveProperty, 'globalReceive' );
+    assert.equal( typeof target.globalReceive, 'function' );
   });
 
-  it('sends messages using the given send function', function () {
-    bridge.invoke('method', [1, 2]);
+  it( 'sends messages using the given send function', function () {
+    bridge.invoke( 'method', [ 1, 2 ] );
 
-    const msg = JSON.parse(lastJSON);
+    const msg = JSON.parse( lastJSON );
 
-    expect(msg.id.startsWith('GlobalBridge')).toBeTruthy();
-    expect(msg.method).toEqual('method');
-    expect(msg.params).toEqual([1, 2]);
+    assert.ok( msg.id.startsWith( 'PropertyBridge' ) );
+    assert.equal( msg.method, 'method' );
+    assert.deepEqual( msg.params, [ 1, 2 ] );
 
-    bridge.notify('method', [3, 4]);
+    bridge.notify( 'method', [ 3, 4 ] );
 
-    expect(JSON.parse(lastJSON)).toEqual({
+    assert.deepEqual( JSON.parse( lastJSON ), {
       method: 'method',
-      params: [3, 4]
+      params: [ 3, 4 ]
     });
   });
 
-  it('routes messages from the global receive function', function () {
+  it( 'routes messages from the global receive function', function () {
     const sentMsg = { method: 'fn', params: [] };
 
-    bridge.expose('fn', function (path, msg) {
-      expect(path).toEqual('');
-      expect(msg).toEqual(sentMsg);
+    bridge.expose( 'fn', function ( path, msg ) {
+      assert.deepEqual( path, '' );
+      assert.deepEqual( msg, sentMsg );
     });
 
-    window.globalReceive(JSON.stringify(sentMsg));
+    target.globalReceive( JSON.stringify( sentMsg ) );
   });
 
-  it('removes the function on close', function () {
+  it( 'removes the function on close', function () {
     bridge.close();
 
-    expect(window.globalReceive).toEqual(null);
+    assert.deepEqual( target.globalReceive, null );
   });
 });
 
 
-describe('IframeBridge', function () {
-  // Route messages to my own window, i.e. to myself.
-  const bridge = new IframeBridge(window);
-  let lastArg;
+describe.skip( 'IframeBridge', function () {
+  let bridge, lastArg;
 
-  it('posts messages to the target window', function (done) {
-    bridge.expose('self', function (path, msg) {
-      lastArg = msg.params[0];
+  beforeEach( () => {
+    // Route messages to my own window, i.e. to myself.
+    bridge = new IframeBridge( window );
+  });
+
+  it( 'posts messages to the target window', function ( done ) {
+    bridge.expose( 'self', function ( path, msg ) {
+      lastArg = msg.params[ 0 ];
       done();
     });
 
-    bridge.notify('self', [1]);
+    bridge.notify( 'self', [ 1 ] );
   });
 
-  it('removes all event listeners on close', function (done) {
+  it( 'removes all event listeners on close', function ( done ) {
     bridge.close();
-    bridge.notify('self', [2]);
+    bridge.notify( 'self', [ 2 ] );
 
-    setTimeout(() => {
-      expect(lastArg).toBe(1);
+    setTimeout( () => {
+      assert.equal( lastArg, 1 );
       done();
-    }, 20);
+    }, 20 );
   });
 });

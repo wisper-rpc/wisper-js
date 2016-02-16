@@ -119,10 +119,10 @@ export class BaseBridge {
 }
 
 
-export class GlobalBridge extends BaseBridge {
-  constructor(receiveProperty, send) {
+export class PropertyBridge extends BaseBridge {
+  constructor(target, receiveProperty, send) {
     super();
-    set(window, this.receiveProperty = receiveProperty, json => {
+    set( this.target = target, this.receiveProperty = receiveProperty, json => {
       this.receiveJSON(json);
     });
     this.sendJSON = send;
@@ -130,7 +130,7 @@ export class GlobalBridge extends BaseBridge {
 
   close() {
     super.close();
-    set(window, this.receiveProperty, null);
+    set(this.target, this.receiveProperty, null);
   }
 }
 
