@@ -1,20 +1,30 @@
 {
   "env": {
-    "jasmine": true,
+    "mocha": true,
+    "es6": true,
     "browser": true
   },
-  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
   "rules": {
-    "indent": [2, 2],
+    "array-bracket-spacing": [  2, "always" ],
+    "comma-spacing": [ 2, { "before": false, "after": true } ],
+    "computed-property-spacing": [  2, "always" ],
+    "indent": [ 2, 2 ],
     "newline-after-var": 2,
     "no-console": 1,
+    "no-constant-condition": 1,
     "no-shadow": 1,
     "no-use-before-define": 0,
+    "object-curly-spacing": [ 2, "always" ],
     "prefer-const": 2,
-    "quotes": [2, "single", "avoid-escape"],
-    "space-after-keywords": [2, "always"],
-    "space-before-blocks": [2, "always"],
-    "space-before-function-paren": [2, {"anonymous": "always", "named": "never"}],
-    "strict": [2, "never"]
+    "quotes": [ 2, "single", "avoid-escape" ],
+    "keyword-spacing": 2,
+    "space-before-blocks": [ 2, "always" ],
+    "space-before-function-paren": [ 2, { "anonymous": "always", "named": "never" } ],
+    #"space-in-parens": [ 2, "always", { "exceptions": [ "{}" ] } ],
+    "strict": [ 2, "never" ]
   }
 }
