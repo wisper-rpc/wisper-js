@@ -1,8 +1,8 @@
-import { properties, Remote, interfaceName } from '../../src/objects';
-import { string } from '../../src/types';
-// import signature from '../../src/signature';
+import assert from 'assert';
+import { properties, Remote, interfaceName } from '../../src/objects.js';
+import { string } from '../../src/types.js';
 
-import { BaseBridge } from '../../src/bridges';
+import { BaseBridge } from '../../src/bridges.js';
 
 const bridge = new BaseBridge();
 
@@ -10,7 +10,7 @@ var nextId = 0;
 var messages = [];
 
 function lastMessage() {
-  return messages[messages.length - 1];
+  return messages[ messages.length - 1 ];
 }
 
 bridge.notify = bridge.invoke = function (method, params) {
@@ -23,35 +23,32 @@ bridge.notify = bridge.invoke = function (method, params) {
 
 
 // Test class for Remotes.
-@interfaceName(bridge, 'wisp.test.EmptyObject')
-@properties({
+class TestRemoteObject extends Remote {}
+
+properties({
   name: string
-})
-class TestRemoteObject extends Remote {
-  constructor() {
-    super();
-  }
-}
+})( TestRemoteObject );
+interfaceName( bridge, 'wisp.test.EmptyObject' )( TestRemoteObject );
 
 
 describe('RemoteObject', function () {
   it('constructor should return its own instance', function () {
     const instance = new TestRemoteObject();
 
-    expect(instance instanceof Remote).toBeTruthy();
-    expect(instance instanceof TestRemoteObject).toBeTruthy();
+    assert.ok( instance instanceof Remote );
+    assert.ok( instance instanceof TestRemoteObject );
   });
 
   it('should create properties from annotations', function (done) {
     const instance = new TestRemoteObject();
 
-    expect(typeof instance.name).toEqual('string');
-    expect(instance.name).toEqual('');
+    assert.equal( typeof instance.name, 'string' );
+    assert.equal( instance.name, '' );
 
     instance.name = 'Charlie';
 
     setTimeout(() => {
-      expect(lastMessage()).toEqual({
+      assert.deepEqual( lastMessage(), {
         method: 'wisp.test.EmptyObject:!',
         params: [ '1', 'name', 'Charlie' ]
       });
@@ -59,16 +56,11 @@ describe('RemoteObject', function () {
     }, 20);
   });
 
-  it('`ready` property is a Promise for the resolved instance', function (done) {
-    var newInstance = new TestRemoteObject();
+  it('`ready` property is a Promise for the resolved instance', () => {
+    return new TestRemoteObject().ready.then(instance => {
+      assert.ok( instance instanceof Remote );
 
-    expect(newInstance.ready instanceof Promise).toBeTruthy();
-
-    newInstance.ready.then(instance => {
-      expect(instance instanceof Remote).toBeTruthy();
-
-      expect(lastMessage().method).toEqual('wisp.test.EmptyObject~');
-      done();
-    }).catch(fail);
+      assert.equal( lastMessage().method, 'wisp.test.EmptyObject~' );
+    });
   });
 });

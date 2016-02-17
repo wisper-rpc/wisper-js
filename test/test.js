@@ -6,3 +6,4 @@ import './split.js';
 import './types.js';
 
 import './objects/properties.js';
+import './objects/Remote.js';
