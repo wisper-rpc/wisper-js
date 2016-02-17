@@ -5,5 +5,6 @@ import './protocol.js';
 import './split.js';
 import './types.js';
 
+import './objects/Local.js';
 import './objects/properties.js';
 import './objects/Remote.js';
