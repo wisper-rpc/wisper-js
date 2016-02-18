@@ -77,11 +77,11 @@ export class BaseBridge {
       // TODO: Improve error handling. Log for now.
       console.error(msg.error.name, msg.error.message);
     } else {
-      this.sendReponse(msg.id, this.router.route(msg.method, msg));
+      this.sendResponse(msg.id, this.router.route(msg.method, msg));
     }
   }
 
-  sendReponse(id, promise) {
+  sendResponse(id, promise) {
     if (promise) {
       promise.then(
         result => id && this.send({ id, result }),
