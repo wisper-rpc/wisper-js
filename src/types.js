@@ -1,15 +1,7 @@
-import mapValues from 'lodash/object/mapValues';
-import every from 'lodash/collection/every';
-import clone from 'lodash/lang/cloneDeep';
-import isObject from 'lodash/lang/isPlainObject';
-import identity from 'lodash/utility/identity';
-
-// import {
-//   mapValues,
-//   every,
-//   cloneDeep as clone,
-//   isPlainObject as isObject
-// } from 'future-lodash';
+import { mapValues, clonePlain } from './lodash.js';
+import baseEvery from 'lodash-es/_baseEvery';
+import isObjectLike from 'lodash-es/isObjectLike';
+import identity from 'lodash-es/identity';
 
 
 // A `type` has the following properties:
@@ -58,7 +50,7 @@ export const any = {
 
     const type = Object.create(this);
 
-    type.defaultValue = () => clone(val);
+    type.defaultValue = () => clonePlain(val);
 
     return type;
   },
@@ -137,7 +129,7 @@ export function array(baseType) {
 // Creates a new composite type of the given object structure.
 // The given value must be an object with only properties.
 export function object(properties) {
-  if (!isObject(properties) || !every(properties, isType)) {
+  if (!isObjectLike(properties) || !baseEvery(properties, isType)) {
     throw new TypeError('Not all object properties were types.');
   }
 
@@ -147,8 +139,8 @@ export function object(properties) {
     key + ': ' + properties[key].name).join(', ') + ' }';
 
   type.valid = val =>
-    isObject(val) &&
-    every(properties, (baseType, key) => baseType.valid(val[key]));
+    isObjectLike(val) &&
+    baseEvery(properties, (baseType, key) => baseType.valid(val[key]));
 
   type.defaultValue = () => mapValues(properties, baseType => baseType.defaultValue());
 

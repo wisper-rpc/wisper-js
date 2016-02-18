@@ -1,4 +1,4 @@
-import { isType } from './types';
+import { isType } from './types.js';
 
 
 // Decorator to define the type `signature` for the decorated class or method.

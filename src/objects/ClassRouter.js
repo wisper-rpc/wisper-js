@@ -1,9 +1,9 @@
-import assign from 'lodash/object/assign';
-import mapValues from 'lodash/object/mapValues';
-import { WisperError, domain, code } from '../errors';
-import Base from './Base';
-import Local from './Local';
-import internal from './internal';
+import assign from 'lodash-es/assign';
+import { mapValues } from '../lodash.js';
+import { WisperError, domain, code } from '../errors.js';
+import Base from './Base.js';
+import Local from './Local.js';
+import internal from './internal.js';
 
 // Returns true if `string` ends with `tail`.
 function endsWith(string, tail) {

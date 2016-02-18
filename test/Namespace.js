@@ -1,4 +1,13 @@
-import Namespace from '../src/Namespace';
+import assert from 'assert';
+import noop from 'lodash-es/noop';
+import Namespace from '../src/Namespace.js';
+
+function rejected( p ) {
+  return p.then(
+    () => { throw new Error( 'Promise should be rejected' ); },
+    noop
+  );
+}
 
 describe('Namespace', function () {
   const ns = new Namespace();
@@ -13,55 +22,55 @@ describe('Namespace', function () {
 
 
   it('is an ES6 class', function () {
-    expect(Namespace).toThrow();
+    assert.throws(Namespace);
   });
 
 
   it('initially has no routes', function () {
-    expect(Object.keys(ns.routes).length).toBe(0);
+    assert.equal(Object.keys(ns.routes).length, 0);
   });
 
 
   describe('.expose', function () {
     it('exposes Routers and RouteFunctions, returning true', function () {
       // Router
-      expect(ns.expose('router', router)).toBe(true);
+      assert.equal( ns.expose('router', router), true );
 
       // RouteFunction
-      expect(ns.expose('func', func)).toBe(true);
+      assert.equal( ns.expose('func', func), true );
 
-      expect(Object.keys(ns.routes).length).toBe(2);
+      assert.equal( Object.keys(ns.routes).length, 2 );
     });
 
     it('cannot overwrite a router', function () {
-      expect(ns.expose('router', () => {})).toBe(false);
+      assert.equal( ns.expose('router', () => {}), false );
     });
 
     it('creates sub-namespaces for nested routes', function () {
-      expect(ns.expose('sub.func', func)).toBe(true);
-      expect(Object.keys(ns.routes).length).toBe(3);
+      assert.equal( ns.expose('sub.func', func), true );
+      assert.equal( Object.keys(ns.routes).length, 3 );
 
-      expect(ns.expose('sub.func2', func)).toBe(true);
-      expect(Object.keys(ns.routes).length).toBe(3);
+      assert.equal( ns.expose('sub.func2', func), true );
+      assert.equal( Object.keys(ns.routes).length, 3 );
     });
   });
 
 
   describe('.route', function () {
-    it('rejects empty paths', function (done) {
-      ns.route('', { method: 'some.', params: [] }).then(fail, done);
+    it('rejects empty paths', function () {
+      return rejected( ns.route('', { method: 'some.', params: [] }) );
     });
 
-    it('rejects paths without handlers', function (done) {
-      ns.route('no.thing', { method: 'no.thing', params: [] }).then(fail, done);
+    it('rejects paths without handlers', function () {
+      return rejected( ns.route('no.thing', { method: 'no.thing', params: [] }) );
     });
 
     it('invokes eventual Router\'s route method', function () {
-      expect(ns.route('router.thing', { method: 'router.thing', params: [] })).toBe('thing');
+      assert.equal( ns.route('router.thing', { method: 'router.thing', params: [] }), 'thing' );
     });
 
     it('invokes eventual handler functions', function () {
-      expect(ns.route('func.thing', { method: 'func.thing', params: [] })).toBe('thing2');
+      assert.equal( ns.route('func.thing', { method: 'func.thing', params: [] }), 'thing2' );
     });
   });
 });

@@ -1,25 +1,27 @@
-import { isMessage, isResponse, isResult, isInvoke, isPlainError, isError } from '../src/protocol';
+import assert from 'assert';
+import forOwn from 'lodash-es/forOwn';
+import { isMessage, isResponse, isResult, isInvoke, isPlainError, isError } from '../src/protocol.js';
 
 describe('protocol', function () {
-  const messages = [
+  const messages = {
     // Plain error
-    { error: {} },
+    'plain error': { error: {} },
 
     // Result response
-    { id: 'a', result: 2 },
+    'result response': { id: 'a', result: 2 },
 
     // Error response
-    { id: 'b', error: {} },
+    'error response': { id: 'b', error: {} },
 
     // Invoke
-    { method: 'a', params: [] },
+    'invoke': { method: 'a', params: [] },
 
     // empty object
-    {},
+    'empty object': {},
 
     // invalid
-    null
-  ];
+    'null': null
+  };
 
   const passingChecks = [
     [ isMessage, isPlainError ],
@@ -39,9 +41,14 @@ describe('protocol', function () {
     [ isMessage ]
   ];
 
-  it('validates the types of messages', function () {
-    messages.every((msg, i) =>
-      passingChecks[i].every(fn => fn(msg)) &&
-      failingChecks[i].every(fn => !fn(msg)));
+  let i = 0;
+
+  forOwn( messages, ( message, test ) => {
+    const j = i++;
+
+    it( 'validates ' + test, function () {
+      assert.ok( passingChecks[ j ].every( fn => fn( message ) ), 'failed check should pass' );
+      assert.ok( failingChecks[ j ].every( fn => !fn( message ) ), 'passed check should fail' );
+    });
   });
 });

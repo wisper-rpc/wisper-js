@@ -1,4 +1,4 @@
-export { BaseBridge, GlobalBridge, IframeBridge } from './src/bridges';
+export { BaseBridge, PropertyBridge, IframeBridge } from './src/bridges';
 
 import * as types from './src/types';
 import signature from './src/signature';

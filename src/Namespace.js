@@ -1,5 +1,5 @@
-import split from './split';
-import { WisperError, domain, code } from './errors';
+import split from './split.js';
+import { WisperError, domain, code } from './errors.js';
 
 
 export default class Namespace {
@@ -32,6 +32,7 @@ export default class Namespace {
     return handler(rest, msg);
   }
 
+  // Tries to expose `handler` at the given `path`.
   expose(path, handler) {
     const [step, rest] = split(path);
 

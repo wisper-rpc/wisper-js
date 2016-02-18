@@ -1,7 +1,7 @@
-import interfaceName from './objects/interfaceName';
-import Local from './objects/Local';
-import properties from './objects/properties';
-import Remote from './objects/Remote';
+import interfaceName from './objects/interfaceName.js';
+import Local from './objects/Local.js';
+import properties from './objects/properties.js';
+import Remote from './objects/Remote.js';
 
 
 export { Local, Remote, interfaceName, properties };

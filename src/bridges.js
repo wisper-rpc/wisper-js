@@ -1,8 +1,8 @@
-import set from 'lodash/object/set';
-import Namespace from './Namespace';
-import { WisperError, domain, code } from './errors';
-import { isResponse, isMessage, isPlainError, isResult } from './protocol';
-import stringId from './stringId';
+import set from 'lodash-es/set';
+import Namespace from './Namespace.js';
+import { WisperError, domain, code } from './errors.js';
+import { isResponse, isMessage, isPlainError, isResult } from './protocol.js';
+import stringId from './stringId.js';
 
 function noop() {}
 
@@ -77,11 +77,11 @@ export class BaseBridge {
       // TODO: Improve error handling. Log for now.
       console.error(msg.error.name, msg.error.message);
     } else {
-      this.sendReponse(msg.id, this.router.route(msg.method, msg));
+      this.sendResponse(msg.id, this.router.route(msg.method, msg));
     }
   }
 
-  sendReponse(id, promise) {
+  sendResponse(id, promise) {
     if (promise) {
       promise.then(
         result => id && this.send({ id, result }),
@@ -119,10 +119,10 @@ export class BaseBridge {
 }
 
 
-export class GlobalBridge extends BaseBridge {
-  constructor(receiveProperty, send) {
+export class PropertyBridge extends BaseBridge {
+  constructor(target, receiveProperty, send) {
     super();
-    set(window, this.receiveProperty = receiveProperty, json => {
+    set( this.target = target, this.receiveProperty = receiveProperty, json => {
       this.receiveJSON(json);
     });
     this.sendJSON = send;
@@ -130,7 +130,7 @@ export class GlobalBridge extends BaseBridge {
 
   close() {
     super.close();
-    set(window, this.receiveProperty, null);
+    set(this.target, this.receiveProperty, null);
   }
 }
 

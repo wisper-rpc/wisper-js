@@ -12,7 +12,7 @@ export function isInvoke(msg) {
 
 
 export function isPlainError(msg) {
-  return 'error' in msg;
+  return 'error' in msg && !( 'id' in msg );
 }
 
 

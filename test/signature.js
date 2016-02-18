@@ -1,5 +1,6 @@
-import signature from '../src/signature';
-import { number } from '../src/types';
+import assert from 'assert';
+import signature from '../src/signature.js';
+import { number } from '../src/types.js';
 
 describe('signature', function () {
   function shouldAvoidThrow(val) {
@@ -28,7 +29,7 @@ describe('signature', function () {
           [ [], number ]
       ];
 
-      expect(correctArguments.every(shouldNotThrow)).toBeTruthy();
+      assert.ok( correctArguments.every( shouldNotThrow ) );
     });
 
     it('SHOULD throw for invalid args', function () {
@@ -42,35 +43,45 @@ describe('signature', function () {
         [ [ number, 1 ] ]
       ];
 
-      expect(invalidArguments.every(shouldThrow)).toBeTruthy();
+      assert.ok( invalidArguments.every( shouldThrow ) );
     });
   });
 
   it('should set properties on classes', function () {
-    @signature([ number, number ])
+    // TODO: Babel 6 doesn't support decorators. We should avoid them for now.
+    // @signature([ number, number ])
     class Point {
       constructor(x, y) {
         this.x = x;
         this.y = y;
       }
     }
+    Point.parameterTypes = [ number, number ];
 
-    expect(Point.parameterTypes).toEqual([ number, number ]);
+    // This just becomes silly.
+    assert.deepEqual( Point.parameterTypes, [ number, number ] );
   });
 
   it('should set properties on methods', function () {
+    // TODO: Babel 6 doesn't support decorators. We should avoid them for now.
     const obj = {
-      @signature([ number, number ], number)
+      // @signature([ number, number ], number)
       fn() {},
 
-      @signature([ number ])
+      // @signature([ number ])
       fn2() {}
     };
 
-    expect(obj.fn.parameterTypes).toEqual([ number, number ]);
-    expect(obj.fn.returnType).toEqual(number);
+    obj.fn.parameterTypes = [ number, number ];
+    obj.fn.returnType = number;
 
-    expect(obj.fn2.parameterTypes).toEqual([ number ]);
-    expect(obj.fn2.returnType).toEqual(undefined);
+    obj.fn2.parameterTypes = [ number ];
+
+    // This just becomes silly.
+    assert.deepEqual( obj.fn.parameterTypes, [ number, number ] );
+    assert.deepEqual( obj.fn.returnType, number );
+
+    assert.deepEqual( obj.fn2.parameterTypes, [ number ] );
+    assert.deepEqual( obj.fn2.returnType, undefined );
   });
 });

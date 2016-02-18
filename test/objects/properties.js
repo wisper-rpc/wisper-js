@@ -1,21 +1,25 @@
-import { properties, Local } from '../../src/objects';
-import { string, number } from '../../src/types';
+import assert from 'assert';
+import { properties, Local } from '../../src/objects.js';
+import { string, number } from '../../src/types.js';
 
-describe('properties', function () {
-  @properties({
-    name: string
-  })
+describe('properties', () => {
+
   class A extends Local {}
 
+  properties({
+    name: string
+  })( A );
 
-  it('throws if an inherited property is redeclared', function () {
-    expect(function () {
-      @properties({
-        name: number
-      })
+
+  it('throws if an inherited property is redeclared', () => {
+    assert.throws(() => {
       class B extends A {}
 
+      properties({
+        name: number
+      })( B );
+
       return new B();
-    }).toThrowError(/Can't redefine inherited property 'name: string'/);
+    }, /Can't redefine inherited property 'name: string'/ );
   });
 });

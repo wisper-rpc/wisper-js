@@ -1,4 +1,5 @@
-import { any, string, number, boolean, readonly, array, object, nullable, isType } from '../src/types';
+import assert from 'assert';
+import { any, string, number, boolean, readonly, array, object, nullable, isType } from '../src/types.js';
 
 describe('type', function () {
   function all(arr) {
@@ -7,13 +8,13 @@ describe('type', function () {
 
 
   it('knows what types are', function () {
-    expect([
+    assert.deepEqual([
       number,
       string,
       {},
       1,
       null
-    ].map(isType)).toEqual([
+    ].map(isType), [
       true,
       true,
       false,
@@ -24,10 +25,10 @@ describe('type', function () {
 
 
   it('has names', function () {
-    expect([
+    assert.deepEqual([
       any, string, number, boolean,
       array(number), nullable(object({ x: number, y: number }))
-    ].map(t => t.name)).toEqual([
+    ].map(t => t.name), [
       'any', 'string', 'number', 'boolean',
       'array<number>', 'nullable<{ x: number, y: number }>'
     ]);
@@ -35,7 +36,7 @@ describe('type', function () {
 
 
   it('defines basic types: string, number & boolean', function () {
-    expect(all([
+    assert.ok(all([
       any.valid(''),
       any.valid(true),
       any.valid(false),
@@ -55,41 +56,43 @@ describe('type', function () {
       !number.valid(true),
       !number.valid(false),
       number.valid(6)
-    ])).toBeTruthy();
+    ]));
 
-    expect([
-      string,
-      boolean,
-      number
-    ].map(x => x.defaultValue())).toEqual(['', false, 0]);
+    assert.deepEqual(
+      [ string, boolean, number].map( x => x.defaultValue() ),
+      ['', false, 0]
+    );
   });
 
   it('can make a type readonly', function () {
-    expect(all([number, string, boolean].map(type => {
+    assert.ok( all([number, string, boolean].map(type => {
       const newType = readonly(type);
 
       return !newType.writable && newType.defaultValue === type.defaultValue;
-    }))).toBeTruthy();
+    })));
   });
 
   it('can override defaultValues', function () {
-    expect([
-      string.default('cute cats'),
-      boolean.default(true),
-      number.default(10)
-    ].map(x => x.defaultValue())).toEqual(['cute cats', true, 10]);
+    assert.deepEqual(
+      [
+        string.default('cute cats'),
+        boolean.default(true),
+        number.default(10)
+      ].map(x => x.defaultValue()),
+      ['cute cats', true, 10]
+    );
   });
 
 
   it('throws exceptions if given invalid defaults', function () {
-    expect(() => number.default('yo')).toThrow();
-    expect(() => object({ x: number }).default(null)).toThrow();
+    assert.throws(() => number.default('yo'));
+    assert.throws(() => object({ x: number }).default(null));
   });
 
 
   it('can marshal and unmarshal types', function () {
     // since any type can marshal into promises, any compositioning type must return a promise
-    expect(array(number).marshal([])).toEqual(jasmine.any(Promise));
+    assert.ok( array(number).marshal([]) instanceof Promise );
 
     const color = Object.create(object({
       r: number,
@@ -115,14 +118,14 @@ describe('type', function () {
       return str;
     };
 
-    expect(color.unmarshal('#ff0000')).toEqual({
+    assert.deepEqual( color.unmarshal('#ff0000'), {
       r: 1,
       g: 0,
       b: 0,
       a: 1
     });
 
-    expect(color.valid(color.unmarshal('#00ff00'))).toBeTruthy();
+    assert.ok( color.valid( color.unmarshal( '#00ff00' ) ) );
   });
 
   describe('can create composite types:', function () {
@@ -152,53 +155,53 @@ describe('type', function () {
         default2 = person.defaultValue();
 
       // The properties assume their respective defaults.
-      expect(default1).toEqual({ name: '', age: 0, fullname: { first: '', last: '' } });
+      assert.deepEqual( default1, { name: '', age: 0, fullname: { first: '', last: '' } });
 
       // The instances returned by `defaultValue` are not the same.
-      expect(default1 === default2).toBeFalsy();
+      assert.notStrictEqual( default1, default2 );
 
       // Needs all properties to be valid.
-      expect(person.valid({ name: 'yo' })).toBeFalsy();
+      assert.ok( !person.valid({ name: 'yo' }) );
 
       // Properties must have correct type.
-      expect(person.valid({ name: 'yo', age: '15' })).toBeFalsy();
+      assert.ok( !person.valid({ name: 'yo', age: '15' }) );
 
       // Anything else should fail.
-      expect(person.valid('123')).toBeFalsy();
-      expect(person.valid(123)).toBeFalsy();
-      expect(person.valid(true)).toBeFalsy();
-      expect(person.valid(null)).toBeFalsy();
+      assert.ok( !person.valid('123') );
+      assert.ok( !person.valid(123) );
+      assert.ok( !person.valid(true) );
+      assert.ok( !person.valid(null) );
     });
 
     it('"nullable" function should throw TypeError for invalid base type as parameter', function () {
-      expect([
+      assert.ok([
         null,
         undefined,
         function () {},
         {}
-      ].every(x => isFunctionThrowException(nullable, x))).toBeTruthy();
+      ].every(x => isFunctionThrowException(nullable, x)));
     });
 
     it('"readonly" function should throw TypeError for invalid base type as parameter', function () {
-      expect([
+      assert.ok([
         null,
         undefined,
         function () {},
         {}
-      ].every(x => isFunctionThrowException(readonly, x))).toBeTruthy();
+      ].every(x => isFunctionThrowException(readonly, x)));
     });
 
     it('"array" function should throw TypeError for invalid base type as parameter', function () {
-      expect([
+      assert.ok([
         null,
         undefined,
         function () {},
         {}
-      ].every(x => isFunctionThrowException(array, x))).toBeTruthy();
+      ].every(x => isFunctionThrowException(array, x)));
     });
 
     it('"object" function should throw TypeError for invalid property structure as parameter', function () {
-      expect([
+      assert.ok([
         null, undefined, function () {},
         string, number, boolean, array(string), nullable(number), readonly(boolean),
         {
@@ -210,34 +213,41 @@ describe('type', function () {
           }),
           doSomething: function () {}
         }
-      ].every(x => isFunctionThrowException(object, x))).toBeTruthy();
+      ].every(x => isFunctionThrowException(object, x)));
     });
 
     it('nullable', function () {
       const nullablePerson = nullable(person);
 
-      expect(nullablePerson.defaultValue()).toEqual(null);
+      assert.equal( nullablePerson.defaultValue(), null);
 
       // The `baseType` is valid.
-      expect(nullablePerson.valid({ name: 'Dr. Wiley', age: 66, fullname: {first: '', last: ''} })).toBeTruthy();
+      assert.ok( nullablePerson.valid({
+        name: 'Dr. Wiley',
+        age: 66,
+        fullname: {
+          first: '',
+          last: ''
+        }
+      }));
 
       // `null` should be valid.
-      expect(nullablePerson.valid(null)).toBeTruthy();
+      assert.ok( nullablePerson.valid(null) );
 
       // Anything else should fail.
-      expect(nullablePerson.valid(1)).toBeFalsy();
-      expect(nullablePerson.valid('string')).toBeFalsy();
-      expect(nullablePerson.valid(undefined)).toBeFalsy();
+      assert.ok( !nullablePerson.valid(1) );
+      assert.ok( !nullablePerson.valid('string') );
+      assert.ok( !nullablePerson.valid(undefined) );
     });
 
 
     it('array', function () {
-      expect(all([
+      assert.ok(all([
         array(string).valid([]),
         array(string).valid(['megaman']),
         array(number).valid([13, 37]),
         array(person).valid([{ name: 'Dr. Light', age: 74, fullname: {first: '', last: ''} }])
-      ])).toBeTruthy();
+      ]));
     });
   });
 });

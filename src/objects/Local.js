@@ -1,6 +1,6 @@
-import Base from './Base';
-import internal from './internal';
-import stringId from '../stringId';
+import Base from './Base.js';
+import internal from './internal.js';
+import stringId from '../stringId.js';
 
 
 const nextId = stringId();
