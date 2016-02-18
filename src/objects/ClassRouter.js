@@ -1,5 +1,5 @@
 import assign from 'lodash-es/assign';
-import mapValues from 'lodash-es/mapValues';
+import { mapValues } from '../lodash.js';
 import { WisperError, domain, code } from '../errors.js';
 import Base from './Base.js';
 import Local from './Local.js';

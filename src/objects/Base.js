@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import mapValues from 'lodash-es/mapValues';
+import { mapValues } from '../lodash.js';
 import internal from './internal.js';
 
 
