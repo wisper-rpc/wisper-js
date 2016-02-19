@@ -1,5 +1,6 @@
 import forOwn from 'lodash-es/forOwn';
 import assign from 'lodash-es/assign';
+import noop from 'lodash-es/noop';
 import internal from './internal.js';
 
 
@@ -7,6 +8,7 @@ import internal from './internal.js';
 function propertyDescriptor(cls, key, type) {
   const descriptor = {
     enumerable: true,
+    set: noop,
     get() {
       // Return the value from the internal properties.
       return this[internal].props[key];
