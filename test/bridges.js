@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { BaseBridge, PropertyBridge, IframeBridge } from '../src/bridges.js';
+import { BaseBridge, PropertyBridge, IframeBridge } from '../src/bridges/index.js';
 
 describe( 'BaseBridge', function () {
   const bridge = new BaseBridge();

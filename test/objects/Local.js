@@ -5,7 +5,7 @@ import { nullable, instance, number } from '../../src/types.js';
 import signature from '../../src/signature.js';
 import { WisperError, domain, code } from '../../src/errors.js';
 
-import { BaseBridge } from '../../src/bridges.js';
+import BaseBridge from '../../src/bridges/BaseBridge.js';
 
 const bridge = new BaseBridge();
 

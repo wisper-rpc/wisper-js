@@ -2,7 +2,7 @@ import assert from 'assert';
 import { properties, Remote, interfaceName } from '../../src/objects.js';
 import { string } from '../../src/types.js';
 
-import { BaseBridge } from '../../src/bridges.js';
+import BaseBridge from '../../src/bridges/BaseBridge.js';
 
 const bridge = new BaseBridge();
 

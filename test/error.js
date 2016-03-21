@@ -48,6 +48,8 @@ describe('WisperError', function () {
       }
     });
 
+    assert.ok( we instanceof WisperError );
+
     assert.equal( we.domain, domain.RemoteObject );
     assert.equal( we.name, 'InvalidArgumentsError' );
 
