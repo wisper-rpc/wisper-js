@@ -1,7 +1,11 @@
-export { BaseBridge, PropertyBridge, IframeBridge } from './src/bridges';
+export {
+	BaseBridge,
+	IframeBridge,
+	PropertyBridge,
+} from './src/bridges/index.js';
 
-import * as types from './src/types';
-import signature from './src/signature';
+import * as types from './src/types.js';
+import signature from './src/signature.js';
 export { types, signature };
 
-export * from './src/objects';
+export * from './src/objects.js';
