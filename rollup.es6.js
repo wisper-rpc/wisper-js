@@ -8,9 +8,6 @@ export default {
 
   plugins: [
     babel(),
-    resolve(),
-    commonjs({
-      include: 'node_modules/events/**'
-    })
+    resolve()
   ]
 };
