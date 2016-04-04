@@ -1,6 +1,6 @@
 import config from './rollup.cjs.js';
 
-config.external.push( 'assert' );
+config.external = [ 'assert' ];
 
 config.entry = 'test/test.js';
 config.dest = 'tmp/test.js';
