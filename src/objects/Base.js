@@ -1,9 +1,9 @@
-import EventEmitter from 'events';
+import EventHandler from '../events.js';
 import { mapValues } from '../lodash.js';
 import internal from './internal.js';
 
 
-export default class Base extends EventEmitter {
+export default class Base extends EventHandler {
   constructor() {
     super();
 
@@ -26,15 +26,15 @@ export default class Base extends EventEmitter {
 }
 
 
-// Give `Base` all methods of an `EventEmitter`,
+// Give `Base` all methods of an `EventHandler`,
 // in turn handing them down to all subclasses.
-const methods = Object.getOwnPropertyNames(EventEmitter.prototype)
+const methods = Object.getOwnPropertyNames(EventHandler.prototype)
   .reduce((object, name) => {
     object[name] = name;
     return object;
   }, Object.create(null));
 
 Object.defineProperties(Base, mapValues(methods, name =>
-  Object.getOwnPropertyDescriptor(EventEmitter.prototype, name)));
+  Object.getOwnPropertyDescriptor(EventHandler.prototype, name)));
 
 Base.prototype[internal] = Object.create(Object.prototype);

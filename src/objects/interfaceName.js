@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import EventHandler from '../events.js';
 import ClassRouter from './ClassRouter.js';
 
 
@@ -13,6 +13,6 @@ export default function interfaceName(bridge, name) {
     }
 
     // Constructor be called several times on same object.
-    EventEmitter.call(cls);
+    EventHandler.call(cls);
   };
 }
