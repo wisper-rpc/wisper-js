@@ -112,3 +112,16 @@ socket.onmessage = json => bridge.receiveJSON( json );
 ```
 
 This setup code could be used to create a `WebSocketBridge`, but it isn't required to use a bridge.
+
+#### LoopbackBridge
+One fun experiment you can create is that of a loopback bridge; a bridge that sends all messages back to itself. Pretty crazy, eh?
+
+```js
+const bridge = new BaseBridge( json => bridge.receiveJSON( json ) );
+
+// Expose some router to test
+bridge.expose( 'path', someRouter );
+
+// Invoke a method managed by the router to test it.
+bridge.invoke( 'path.foo' ).then( result => ... );
+```
