@@ -1,8 +1,39 @@
 # Objects
 Instead of just invoking methods over a bridge, we can create objects. Objects create a second level of abstraction building on top of [Bridge](../bridges/)'s `notify` and `invoke`.
 
-### Creation
 Objects can be created, destroyed, have their methods invoked and events dispatched.
+
+### Creation and Destruction
+Objects are created using the `new` operator, and destroyed using the `destroy` method.
+
+##### Example
+```js
+// Create and use a remote object instance.
+const remote = new RemoteObject();
+
+// later...
+remote.destroy();
+```
+
+### Methods
+Methods that need to return a value return a Promise, due to the asynchronous nature of communicating over a bridge.
+
+```js
+instance.methodWithResult( some, parameters ).then( result => {
+	// There is no result to use.
+	instance.noReturnValue( `Awesome: ${ result }!` );
+});
+```
+
+This can be made to _feel_ synchronous using `async`/`await`.
+```js
+async function foo( instance ) {
+	const result = await instance.methodWithResult( some, parameters );
+
+	// There is no result to use.
+	instance.noReturnValue( `Awesome: ${ result }!` );
+}
+```
 
 ### Events
 It's possible to listen for remote events on an object by calling the `.on( string, function )` method. You can unsubscribing using the `.off` method.
