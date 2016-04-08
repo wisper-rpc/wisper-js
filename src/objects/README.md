@@ -134,6 +134,9 @@ page.getLink().then( link => {
 We do require _some_ client-side implementation for this to work, but it's pretty straightforward.
 
 ##### Example: Remote definition
+The `@interfaceName` decorator creates a [`Router`](../routers/) for the `WebPage`, and exposes it at the given path in the `bridge`.
+
+> NOTE: The class will not be usable unless you decorate it with `@interfaceName`.
 
 ```js
 import bridge from 'some-bridge';

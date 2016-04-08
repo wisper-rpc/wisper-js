@@ -6,6 +6,8 @@ Details about the wisper protocol itself can be found [here](https://bitbucket.o
 ## Getting Started
 Take a look at the documentation for the [`Bridge` class](./src/bridges/), it's at the core of `wisper-js` and will point you in the right direction for everything else.
 
+If you're interested in higher levels of abstraction, take a look at [Objects](./src/objects/).
+
 #### Example: Communicating across an Iframe boundary
 To communicate across an iframe boundary we can use the `IframeBridge`, which sends JSON using `postMessage`.
 
