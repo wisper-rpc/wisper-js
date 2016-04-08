@@ -155,7 +155,7 @@ import {
 class WebPage extends Remote {
 	getLink() {
 		// FIXME: this isn't very convenient
-		return this.bridge.invokeAsync( this.interfaceName + ':getLink' );
+		return this.bridge.invokeAsync( this.interfaceName + ':getLink', [ this.id ] );
 	}
 }
 
