@@ -1,6 +1,8 @@
 # wisper-js changelog
 
 ## master
+
+## 0.2.2
 * If `result` is `undefined` when sending a result-response an invalid message will be generated (`JSON.stringify` removes object keys with undefined values). This is solved by setting result to `null`.
 
 ## 0.2.1
