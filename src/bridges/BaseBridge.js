@@ -6,6 +6,10 @@ import stringId from '../stringId.js';
 
 const nextBridgeId = stringId();
 
+function nullIfUndefined( value ) {
+  return value != null ? value : null;
+}
+
 export default class BaseBridge {
   constructor() {
     this.id = this.constructor.name + nextBridgeId() + '-';
@@ -113,7 +117,7 @@ export default class BaseBridge {
 
   sendResponse(id, promise) {
     if (promise) {
-      promise.then(
+      promise.then( nullIfUndefined ).then(
         result => id && this.send({ id, result }),
         error => this.send({ id, error }));
     }

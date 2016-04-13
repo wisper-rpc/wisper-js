@@ -8,11 +8,26 @@ describe( 'BaseBridge', function () {
     bridge.send = data => {
       assert.deepEqual( data, {
         method: 'some',
-        params: [ false ]
+        params: [ false ],
       });
     };
 
     bridge.notify( 'some', [ false ] );
+  });
+
+  it( 'fixes result-responses where `result` is undefined', function () {
+    const b = new BaseBridge();
+
+    const promise = new Promise( resolve => b.sendJSON = resolve );
+
+    b.sendResponse( 'foo', Promise.resolve( undefined ) );
+
+    return promise.then( json => {
+      assert.deepEqual( JSON.parse( json ), {
+        id: 'foo',
+        result: null,
+      });
+    });
   });
 });
 
@@ -43,7 +58,7 @@ describe( 'PropertyBridge', function () {
 
     assert.deepEqual( JSON.parse( lastJSON ), {
       method: 'method',
-      params: [ 3, 4 ]
+      params: [ 3, 4 ],
     });
   });
 
