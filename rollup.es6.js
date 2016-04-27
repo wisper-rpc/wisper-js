@@ -6,7 +6,12 @@ export default {
   dest: 'dist/wisper.es6.js',
 
   plugins: [
-    babel(),
+    babel({
+      babelrc: false,
+      presets: [
+        'es2015-rollup',
+      ],
+    }),
     resolve(),
   ],
 };
