@@ -1,7 +1,7 @@
 import noop from 'lodash-es/noop';
 import { WisperError, domain, code } from '../errors.js';
 import { isResponse, isMessage, isPlainError, isResult } from '../protocol.js';
-import Namespace from '../Namespace.js';
+import { Namespace } from '../routers.js';
 import stringId from '../stringId.js';
 
 const nextBridgeId = stringId();

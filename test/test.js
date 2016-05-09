@@ -1,6 +1,6 @@
 import './bridges.js';
 import './error.js';
-import './Namespace.js';
+import './routers/Namespace.js';
 import './protocol.js';
 import './signature.js';
 import './split.js';

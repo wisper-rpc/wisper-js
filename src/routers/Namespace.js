@@ -1,5 +1,5 @@
 import split from './split.js';
-import { WisperError, domain, code } from './errors.js';
+import { WisperError, domain, code } from '../errors.js';
 
 
 export default class Namespace {
@@ -13,10 +13,10 @@ export default class Namespace {
         code.missingProcedure, `Invalid path '${msg.method}'!`));
     }
 
-    const [step, rest] = split(path);
+    const [ step, rest ] = split(path);
 
     // Lookup the PathHandler.
-    const handler = this.routes[step];
+    const handler = this.routes[ step ];
 
     if (!handler) {
       return Promise.reject(new WisperError(domain.Protocol,
@@ -34,19 +34,19 @@ export default class Namespace {
 
   // Tries to expose `handler` at the given `path`.
   expose(path, handler) {
-    const [step, rest] = split(path);
+    const [ step, rest ] = split(path);
 
     // Does there currently exist a handler?
-    let existing = this.routes[step];
+    let existing = this.routes[ step ];
 
     if (!existing) {
 
       if (!rest) {
-        this.routes[step] = handler;
+        this.routes[ step ] = handler;
         return true;
       }
 
-      existing = this.routes[step] = new Namespace();
+      existing = this.routes[ step ] = new Namespace();
     }
 
     if (existing instanceof Namespace) {
