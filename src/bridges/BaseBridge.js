@@ -64,11 +64,10 @@ export default class BaseBridge {
   }
 
   /**
-   * Invokes `method` with `params` as arguments.
+   * Notifies `method` with `params` as arguments.
    *
    * @param  {string} method
    * @param  {any[]} params
-   * @return {Promise<?>}
    */
   notify(method, params=[]) {
     this.send({ method, params });
@@ -86,10 +85,22 @@ export default class BaseBridge {
     return Promise.all(params).then(this.invoke.bind(this, method));
   }
 
+  /**
+   * Notifies `method` with `params` as arguments.
+   * All Promise arguments are resolved before sending the notification.
+   *
+   * @param  {string} method
+   * @param  {any[]} params
+   */
   notifyAsync(method, params=[]) {
     Promise.all(params).then(this.notify.bind(this, method));
   }
 
+  /**
+   * Receive a message encoded as a JSON string.
+   *
+   * @param  {string} json
+   */
   receiveJSON(json) {
     try {
       this.receive(JSON.parse(json));
@@ -98,23 +109,35 @@ export default class BaseBridge {
     }
   }
 
+  /**
+   * Receive a message, by interpreting the given object as a message if possible.
+   *
+   * @param  {Object} msg
+   */
   receive(msg) {
     if (!isMessage(msg)) {
-      return this.send({
-        error: new WisperError(domain.Protocol, code.format, 'Invalid message format'),
+      this.send({
+        error: new WisperError(domain.Protocol, code.format, `Invalid message format, message keys: ${ Object.keys( msg ) }`),
       });
+      return;
     }
 
     if (isResponse(msg)) {
       this.handleResponse(msg);
     } else if (isPlainError(msg)) {
       // TODO: Improve error handling. Log for now.
-      console.error(msg.error.name, msg.error.message);
+      console.error(msg.error);
     } else {
       this.sendResponse(msg.id, this.router.route(msg.method, msg));
     }
   }
 
+  /**
+   * Sends a response for a request with `id`, if `promise` isn't null.
+   *
+   * @param  {string} id
+   * @param  {Promise?} promise
+   */
   sendResponse(id, promise) {
     if (promise) {
       promise.then( nullIfUndefined ).then(
@@ -123,6 +146,11 @@ export default class BaseBridge {
     }
   }
 
+  /**
+   * Handle a response for a request awaiting one.
+   *
+   * @param  {ResponseMessage} msg
+   */
   handleResponse(msg) {
     const waiting = this.waiting[ msg.id ];
 
@@ -138,15 +166,24 @@ export default class BaseBridge {
       this.send({
         id: msg.id,
         error: new WisperError(domain.Protocol, code.oddResponse,
-        `Got unexpected response for id: '${msg.id}', but no request was made.`),
+        `Got a response for id: '${msg.id}', but no request was made.`),
       });
     }
   }
 
+  /**
+   * Exposes a route handler at a given path.
+   * @param  {string} path
+   * @param  {RouteHandler} handler
+   * @return {boolean} whether the expose was successful
+   */
   expose(path, handler) {
     return this.router.expose(path, handler);
   }
 
+  /**
+   * Closes the bridge preventing any more messages from being sent.
+   */
   close() {
     this.sendJSON = noop;
   }

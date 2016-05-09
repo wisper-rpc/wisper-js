@@ -1,6 +1,11 @@
 import BaseBridge from './BaseBridge.js';
 
 export default class IframeBridge extends BaseBridge {
+  /**
+   * Creates an IframeBridge, which communicates with another window.
+   *
+   * @param  {Window} targetWindow
+   */
   constructor(targetWindow) {
     super();
     this.target = targetWindow;

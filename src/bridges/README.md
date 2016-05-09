@@ -5,8 +5,8 @@ Incoming messages will either be sent to a [Router](../routers/), or used as the
 
 ```
 receiveJSON +---------+      +--------+
-    <---    | Bridge  | ---> | Router |
-    --->    +---------+      +--------+
+    --->    | Bridge  | ---> | Router |
+    <---    +---------+      +--------+
   sendJSON  | +invoke |
             | +notify |
             +---------+
