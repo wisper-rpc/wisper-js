@@ -4,7 +4,7 @@ export {
 	PropertyBridge,
 } from './bridges/index.js';
 
-export { Namespace } from './routers/index.js';
+export { Namespace } from './routers.js';
 
 import * as types from './types.js';
 import signature from './signature.js';
