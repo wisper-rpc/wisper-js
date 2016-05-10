@@ -3,7 +3,7 @@
   "version": "0.2.3",
   "description": "A protocol for remote procedure calls, and object abstractions.",
   "main": "dist/wisper.cjs.js",
-  "jsnext:main": "wisper.js",
+  "jsnext:main": "src/main.js",
   "scripts": {
     "postinstall": "npm run build",
     "build": "rollup -c rollup.cjs.js",

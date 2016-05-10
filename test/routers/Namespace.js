@@ -1,6 +1,6 @@
 import assert from 'assert';
 import noop from 'lodash-es/noop';
-import Namespace from '../src/Namespace.js';
+import Namespace from '../../src/routers/Namespace.js';
 
 function rejected( p ) {
   return p.then(
