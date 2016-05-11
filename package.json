@@ -4,6 +4,7 @@
   "description": "A protocol for remote procedure calls, and object abstractions.",
   "main": "dist/wisper.cjs.js",
   "jsnext:main": "src/main.js",
+  "typings": "wisper.d.ts",
   "scripts": {
     "postinstall": "npm run build",
     "build": "rollup -c rollup.cjs.js",
