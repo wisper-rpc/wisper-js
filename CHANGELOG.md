@@ -2,6 +2,9 @@
 
 ## master
 
+## 0.2.4
+* Add `typings` to packahe.json to allow using wisper-js with TypeScript.
+
 ## 0.2.3
 * Remove unused `commonjs` plugin.
 

@@ -1,6 +1,6 @@
 {
   "name": "wisper-js",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A protocol for remote procedure calls, and object abstractions.",
   "main": "dist/wisper.cjs.js",
   "jsnext:main": "src/main.js",
