@@ -55,8 +55,8 @@ export class BaseBridge {
     expose(path: string, router: Router);
     invoke<T>(method: string, params?: any[]): Promise<T>;
     invokeAsync<T>(method: string, params?: any[]): Promise<T>;
-    notify<T>(method: string, params?: any[]): void;
-    notifyAsync<T>(method: string, params?: any[]): void;
+    notify(method: string, params?: any[]): void;
+    notifyAsync(method: string, params?: any[]): void;
 }
 
 export class PropertyBridge extends BaseBridge {
@@ -65,9 +65,12 @@ export class PropertyBridge extends BaseBridge {
 
 // Objects
 export class Base {
-    id: string;
+    id: Promise<string>;
     interfaceName: string;
     bridge: BaseBridge;
+    ready: Promise<this>;
+
+    constructor(params?: any[]);
 
     destroy(): void;
     emit(type: string, value: any): void;
@@ -77,6 +80,8 @@ export class Base {
 
 export class Remote extends Base { }
 export class Local extends Base { }
+
+export function createClassRouter(bridge: BaseBridge, name: string, cls: Base): Router;
 
 // Decorators
 export function interfaceName(bridge: BaseBridge, name: string): ClassDecorator;
