@@ -1,10 +1,10 @@
-import interfaceName from './objects/interfaceName.js';
+export { default as interfaceName, createClassRouter } from './objects/interfaceName.js';
 import Local from './objects/Local.js';
 import properties from './objects/properties.js';
 import Remote from './objects/Remote.js';
 
 
-export { Local, Remote, interfaceName, properties };
+export { Local, Remote, properties };
 
 
 // Decorator to mark methods of an exported class private, or `secret`.

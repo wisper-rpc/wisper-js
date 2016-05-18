@@ -2,6 +2,8 @@ import EventHandler from '../events.js';
 import ClassRouter from './ClassRouter.js';
 
 
+export const createClassRouter = ClassRouter.routing;
+
 // Decorator for `Remote` and `Local` classes.
 // Exposes the classes through the bridge.
 export default function interfaceName(bridge, name) {
