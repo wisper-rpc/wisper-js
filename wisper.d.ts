@@ -72,10 +72,30 @@ export class Base {
 
     constructor(params?: any[]);
 
+    /**
+     * Destroys the Base instance. Take extra care to destroy any created Remote instances. 
+     */
     destroy(): void;
-    emit(type: string, value: any): void;
-    on(type: string, fn: Function): void;
-    off(type: string, fn: Function): void;
+
+    /**
+     * Emits an event locally on the Base instance.
+     */
+    emit<T>(type: string, value: T): this;
+
+    /**
+     * Add a function that listens for events of `type` on the Base instance.
+     */
+    on<T>(type: string, fn: (t: T) => void): this;
+
+    /**
+     * Remove a function that listens for events of `type` on the Base instance.
+     */
+    off<T>(type: string, fn: (t: T) => void): this;
+
+    /**
+     * Dispatches an event across the Base's bridge.
+     */
+    dispatch<T>(type: string, value: T): void;
 }
 
 export class Remote extends Base { }
