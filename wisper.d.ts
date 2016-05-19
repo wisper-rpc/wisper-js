@@ -102,6 +102,7 @@ interface Router {
 
 type PathHandler = Router | RouteFunction;
 
+declare function split(path: string): [string, string];
 
 export class Namespace implements Router {
     constructor();
