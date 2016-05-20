@@ -2,6 +2,10 @@
 
 ## master
 
+## 0.2.5
+* Update the wisper typings
+* Expose `split` and `createClassRouter` functions
+
 ## 0.2.4
 * Add `typings` to packahe.json to allow using wisper-js with TypeScript.
 

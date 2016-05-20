@@ -73,7 +73,7 @@ export class Base {
     constructor(params?: any[]);
 
     /**
-     * Destroys the Base instance. Take extra care to destroy any created Remote instances. 
+     * Destroys the Base instance. Take extra care to destroy any created Remote instances.
      */
     destroy(): void;
 
