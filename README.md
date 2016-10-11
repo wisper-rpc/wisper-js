@@ -1,7 +1,7 @@
 # wisper-js
 The JavaScript implementation of a simple, JSON-based RPC protocol.
 
-Details about the wisper protocol itself can be found [here](https://bitbucket.org/WidespaceGIT/wisper-protocol/src).
+Details about the wisper protocol itself can be found [here](https://github.com/wisper-rpc/wisper-protocol/).
 
 ## Getting Started
 Take a look at the documentation for the [`Bridge` class](./src/bridges/), it's at the core of `wisper-js` and will point you in the right direction for everything else.
