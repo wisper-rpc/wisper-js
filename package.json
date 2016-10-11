@@ -12,7 +12,15 @@
     "test": "mocha tmp",
     "test:watch": "watch 'npm test' src test"
   },
-  "author": "Widespace AB",
+  "author": {
+    "name": "Widespace AB",
+    "url": "http://widespace.com"
+  },
+  "contributors": [
+    "Oskar Segersvärd",
+    "Patrik Nyblad",
+    "Razwan Kader"
+  ],
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
