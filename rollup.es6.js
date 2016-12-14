@@ -1,4 +1,5 @@
-import babel from 'rollup-plugin-babel';
+//import babel from 'rollup-plugin-babel';
+import buble from 'rollup-plugin-buble';
 import resolve from 'rollup-plugin-node-resolve';
 
 export default {
@@ -6,12 +7,7 @@ export default {
   dest: 'dist/wisper.es6.js',
 
   plugins: [
-    babel({
-      babelrc: false,
-      presets: [
-        'es2015-rollup',
-      ],
-    }),
+    buble(),
     resolve(),
   ],
 };
