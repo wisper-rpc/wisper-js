@@ -1,12 +1,12 @@
 {
-  "name": "wisper-js",
+  "name": "wisper-rpc",
   "version": "0.2.6",
   "description": "A protocol for remote procedure calls, and object abstractions.",
   "main": "dist/wisper.cjs.js",
   "jsnext:main": "src/main.js",
   "typings": "wisper.d.ts",
   "scripts": {
-    "postinstall": "npm run build",
+    "prepublish": "npm run test && npm run build",
     "build": "rollup -c rollup.cjs.js",
     "pretest": "rollup -c rollup.test.js",
     "test": "mocha tmp",
@@ -21,14 +21,11 @@
     "Patrik Nyblad",
     "Razwan Kader"
   ],
-  "license": "UNLICENSED",
-  "private": true,
-  "dependencies": {
+  "license": "MIT",
+  "devDependencies": {
     "rollup": "^0.25.4",
     "rollup-plugin-buble": "^0.15.0",
-    "rollup-plugin-node-resolve": "^1.4.0"
-  },
-  "devDependencies": {
+    "rollup-plugin-node-resolve": "^1.4.0",
     "eslint": "^2.1.0",
     "lodash-es": "^4.3.0",
     "mocha": "^2.4.5",
