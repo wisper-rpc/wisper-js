@@ -182,6 +182,19 @@ export default class BaseBridge {
   }
 
   /**
+   * Exposes a function wrapped in a route handler at a given path.
+   * @param  {string} path
+   * @param  {function} exposed function
+   * @return {boolean} whether the expose was successful
+   */
+  exposeFunction(path, fn) {
+    return this.expose(path, (path, message) => {
+      return Promise.resolve(fn.apply(null, message.params));
+    });
+  }
+
+
+  /**
    * Closes the bridge preventing any more messages from being sent.
    */
   close() {

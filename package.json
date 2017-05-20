@@ -1,6 +1,6 @@
 {
   "name": "wisper-rpc",
-  "version": "0.2.7-0",
+  "version": "0.2.7",
   "description": "A protocol for remote procedure calls, and object abstractions.",
   "main": "dist/wisper.cjs.js",
   "module": "dist/wisper.es6.js",
