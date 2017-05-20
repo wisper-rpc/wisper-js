@@ -3,11 +3,11 @@
   "version": "0.2.7-0",
   "description": "A protocol for remote procedure calls, and object abstractions.",
   "main": "dist/wisper.cjs.js",
-  "jsnext:main": "src/main.js",
+  "module": "dist/wisper.es6.js",
   "typings": "wisper.d.ts",
   "scripts": {
     "prepublish": "npm run test && npm run build",
-    "build": "rollup -c rollup.cjs.js",
+    "build": "rollup -c rollup.cjs.js && rollup -c rollup.es6.js",
     "pretest": "rollup -c rollup.test.js",
     "test": "mocha tmp",
     "test:watch": "watch 'npm test' src test"
