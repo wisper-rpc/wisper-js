@@ -1,4 +1,4 @@
-dist/
 tmp/
 node_modules/
 reports/
+test/
