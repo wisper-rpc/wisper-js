@@ -21,7 +21,7 @@ export default class Remote extends Base {
 
   /**
    * @constructor
-   * @param {Array<?>} args
+   * Takes any json compatible arguments and passes them in the constructor call.
    */
   constructor(...args) {
     super();
