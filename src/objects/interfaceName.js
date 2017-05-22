@@ -11,7 +11,7 @@ export function createClassRouter(bridge, name, cls) {
 
 // Decorator for `Remote` and `Local` classes.
 // Exposes the classes through the bridge.
-export default function interfaceName(bridge, name, cls) {
+export default function interfaceName(bridge, name) {
   return cls => {
     const router = createClassRouter(bridge, name, cls);
 
