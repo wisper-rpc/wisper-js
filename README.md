@@ -32,7 +32,6 @@ import { IframeBridge } from 'wisper-js';
 
 const bridge = new IframeBridge(parent);
 
-// TODO: actually implement `exposeFunction`
 bridge.exposeFunction('add', function add(x, y) {
   return x + y;
 });
