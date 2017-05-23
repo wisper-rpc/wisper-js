@@ -21,9 +21,9 @@ export default class Remote extends Base {
 
   /**
    * @constructor
-   * @param {Array<?>} args
+   * Takes any json compatible arguments and passes them in the constructor call.
    */
-  constructor(args=[]) {
+  constructor(...args) {
     super();
     this.id = this.bridge.invoke(this.interfaceName + '~', args).then(result => {
       let id;
